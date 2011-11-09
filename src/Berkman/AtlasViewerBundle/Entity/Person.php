@@ -3,16 +3,17 @@
 namespace Berkman\AtlasViewerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use FOS\UserBundle\Entity\User as BaseUser;
 
 /**
  * Berkman\AtlasViewerBundle\Entity\Person
  */
-class Person
+class Person extends BaseUser
 {
     /**
      * @var integer $id
      */
-    private $id;
+    protected $id;
 
     /**
      * @var Berkman\AtlasViewerBundle\Entity\Atlas
