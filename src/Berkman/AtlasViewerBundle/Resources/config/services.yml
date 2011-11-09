@@ -1,0 +1,7 @@
+parameters:
+#    berkman_atlas_viewer.example.class: Berkman\AtlasViewerBundle\Example
+
+services:
+#    berkman_atlas_viewer.example:
+#        class: %berkman_atlas_viewer.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

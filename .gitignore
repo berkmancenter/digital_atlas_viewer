@@ -1,0 +1,9 @@
+*.swp
+*.php~
+*.orig
+.htaccess
+vendor/
+app/cache/
+app/logs/
+parameters.ini
+web/bundles
