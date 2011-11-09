@@ -1,0 +1,30 @@
+atlas:
+    pattern:  /
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:index" }
+
+atlas_show:
+    pattern:  /{id}/show
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:show" }
+
+atlas_new:
+    pattern:  /new
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:new" }
+
+atlas_create:
+    pattern:  /create
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:create" }
+    requirements: { _method: post }
+
+atlas_edit:
+    pattern:  /{id}/edit
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:edit" }
+
+atlas_update:
+    pattern:  /{id}/update
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:update" }
+    requirements: { _method: post }
+
+atlas_delete:
+    pattern:  /{id}/delete
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:delete" }
+    requirements: { _method: post }
