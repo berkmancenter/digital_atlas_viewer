@@ -1,0 +1,11 @@
+Berkman\AtlasViewerBundle\Entity\Person:
+  type: entity
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  oneToMany:
+    atlases:
+      targetEntity: Atlas
+      mappedBy: owner
