@@ -4,7 +4,7 @@ imports:
 
 framework:
     #esi:             ~
-    #translator:      { fallback: %locale% }
+    translator:      { fallback: %locale% }
     secret:          %secret%
     charset:         UTF-8
     router:          { resource: "%kernel.root_dir%/config/routing.yml" }
@@ -63,3 +63,6 @@ fos_user:
     db_driver: orm
     firewall_name: main
     user_class: Berkman\AtlasViewerBundle\Entity\Person
+    encoder:
+        iterations: 5000
+        encode_as_base64: true
