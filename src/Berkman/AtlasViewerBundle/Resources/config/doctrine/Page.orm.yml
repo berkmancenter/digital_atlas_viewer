@@ -11,7 +11,13 @@ Berkman\AtlasViewerBundle\Entity\Page:
     epsg_code:
       type: integer
     metadata:
-      type: text
+      type: array
+    bounding_box:
+      type: array
+    min_zoom_level:
+      type: integer
+    max_zoom_level:
+      type: integer
   manyToOne:
     atlas:
       targetEntity: Atlas

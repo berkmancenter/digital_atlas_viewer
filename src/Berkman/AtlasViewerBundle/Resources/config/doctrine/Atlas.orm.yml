@@ -11,6 +11,10 @@ Berkman\AtlasViewerBundle\Entity\Atlas:
     description:
       type: text
       nullable: true
+    url:
+      type: string
+    default_epsg_code:
+      type: integer
     created:
       type: datetime
     updated:

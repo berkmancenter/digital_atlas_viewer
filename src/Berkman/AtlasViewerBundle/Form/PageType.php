@@ -13,12 +13,11 @@ class PageType extends AbstractType
             ->add('name')
             ->add('epsg_code')
             ->add('metadata')
-            ->add('atlas')
         ;
     }
 
     public function getName()
     {
-        return 'berkman_atlasviewerbundle_pagetype';
+        return 'page';
     }
 }

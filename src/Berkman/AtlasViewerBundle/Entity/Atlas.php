@@ -25,6 +25,16 @@ class Atlas
     private $description;
 
     /**
+     * @var string $url
+     */
+    private $url;
+
+    /**
+     * @var integer $default_epsg_code
+     */
+    private $default_epsg_code;
+
+    /**
      * @var datetime $created
      */
     private $created;
@@ -97,6 +107,46 @@ class Atlas
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * Set url
+     *
+     * @param string $url
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+    }
+
+    /**
+     * Get url
+     *
+     * @return string 
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    /**
+     * Set default_epsg_code
+     *
+     * @param integer $defaultEpsgCode
+     */
+    public function setDefaultEpsgCode($defaultEpsgCode)
+    {
+        $this->default_epsg_code = $defaultEpsgCode;
+    }
+
+    /**
+     * Get default_epsg_code
+     *
+     * @return integer 
+     */
+    public function getDefaultEpsgCode()
+    {
+        return $this->default_epsg_code;
     }
 
     /**

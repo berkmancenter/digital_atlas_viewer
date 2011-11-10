@@ -22,6 +22,7 @@ class Person extends BaseUser
 
     public function __construct()
     {
+        parent::__construct();
         $this->atlases = new \Doctrine\Common\Collections\ArrayCollection();
     }
     

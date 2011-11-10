@@ -12,14 +12,13 @@ class AtlasType extends AbstractType
         $builder
             ->add('name')
             ->add('description')
-            ->add('created')
-            ->add('updated')
-            ->add('owner')
+            ->add('url')
+            ->add('default_epsg_code')
         ;
     }
 
     public function getName()
     {
-        return 'berkman_atlasviewerbundle_atlastype';
+        return 'atlas';
     }
 }

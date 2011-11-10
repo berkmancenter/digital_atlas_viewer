@@ -25,7 +25,7 @@ class Page
     private $epsg_code;
 
     /**
-     * @var text $metadata
+     * @var array $metadata
      */
     private $metadata;
 
@@ -88,7 +88,7 @@ class Page
     /**
      * Set metadata
      *
-     * @param text $metadata
+     * @param array $metadata
      */
     public function setMetadata($metadata)
     {
@@ -98,7 +98,7 @@ class Page
     /**
      * Get metadata
      *
-     * @return text 
+     * @return array 
      */
     public function getMetadata()
     {
@@ -123,5 +123,80 @@ class Page
     public function getAtlas()
     {
         return $this->atlas;
+    }
+    /**
+     * @var array $bounding_box
+     */
+    private $bounding_box;
+
+
+    /**
+     * Set bounding_box
+     *
+     * @param array $boundingBox
+     */
+    public function setBoundingBox($boundingBox)
+    {
+        $this->bounding_box = $boundingBox;
+    }
+
+    /**
+     * Get bounding_box
+     *
+     * @return array 
+     */
+    public function getBoundingBox()
+    {
+        return $this->bounding_box;
+    }
+    /**
+     * @var integer $min_zoom_level
+     */
+    private $min_zoom_level;
+
+    /**
+     * @var integer $max_zoom_level
+     */
+    private $max_zoom_level;
+
+
+    /**
+     * Set min_zoom_level
+     *
+     * @param integer $minZoomLevel
+     */
+    public function setMinZoomLevel($minZoomLevel)
+    {
+        $this->min_zoom_level = $minZoomLevel;
+    }
+
+    /**
+     * Get min_zoom_level
+     *
+     * @return integer 
+     */
+    public function getMinZoomLevel()
+    {
+        return $this->min_zoom_level;
+    }
+
+    /**
+     * Set max_zoom_level
+     *
+     * @param integer $maxZoomLevel
+     */
+    public function setMaxZoomLevel($maxZoomLevel)
+    {
+        $this->max_zoom_level = $maxZoomLevel;
+    }
+
+    /**
+     * Get max_zoom_level
+     *
+     * @return integer 
+     */
+    public function getMaxZoomLevel()
+    {
+        return $this->max_zoom_level;
     }
 }
