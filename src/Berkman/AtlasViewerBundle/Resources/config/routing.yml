@@ -1,3 +1,11 @@
 BerkmanAtlasViewerBundle_homepage:
-    pattern:  /hello/{name}
-    defaults: { _controller: BerkmanAtlasViewerBundle:Default:index }
+    pattern: / 
+    defaults: { _controller: BerkmanAtlasViewerBundle:Atlas:index }
+
+BerkmanAtlasViewerBundle_atlas:
+    resource: "@BerkmanAtlasViewerBundle/Resources/config/routing/atlas.yml"
+    prefix:   /atlas
+
+BerkmanAtlasViewerBundle_page:
+    resource: "@BerkmanAtlasViewerBundle/Resources/config/routing/page.yml"
+    prefix:   /page

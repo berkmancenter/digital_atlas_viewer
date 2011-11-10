@@ -3,6 +3,10 @@
 namespace Berkman\AtlasViewerBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
+use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
+use Symfony\Component\Security\Acl\Permission\MaskBuilder;
+use Symfony\Component\Process\Process;
 
 use Berkman\AtlasViewerBundle\Entity\Atlas;
 use Berkman\AtlasViewerBundle\Form\AtlasType;
@@ -79,11 +83,30 @@ class AtlasController extends Controller
 
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getEntityManager();
+            $user = $this->get('security.context')->getToken()->getUser();
+            $entity->setCreated(new \DateTime('now'));
+            $entity->setUpdated(new \DateTime('now'));
+
             $em->persist($entity);
             $em->flush();
+            $request->getSession()->setFlash('notice', 'New atlas "' . $entity->getName() . '" created.');
+            
+            // creating the ACL
+            $aclProvider = $this->get('security.acl.provider');
+            $objectIdentity = ObjectIdentity::fromDomainObject($entity);
+            $acl = $aclProvider->createAcl($objectIdentity);
+
+            // retrieving the security identity of the currently logged-in user
+            $securityIdentity = UserSecurityIdentity::fromAccount($user);
+
+            // grant owner access
+            $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
+            $aclProvider->updateAcl($acl);
+
+
+            $process = new Process($_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/web/tiles/' . $entity->getId());
 
             return $this->redirect($this->generateUrl('atlas_show', array('id' => $entity->getId())));
-            
         }
 
         return $this->render('BerkmanAtlasViewerBundle:Atlas:new.html.twig', array(
