@@ -3,11 +3,13 @@ $(function() {
     $('#metadata').hide();
     $('html, body, #map').css({ margin: 0, padding: 0, width: '100%', height: '100%' });
 
-    var atlasBounds = { minx: null, miny: null, maxx: null, maxy: null };
+    var atlasBounds = { minx: null, miny: null, maxx: null, maxy: null }, minZoom = null, maxZoom = null;
 
     // avoid pink tiles
     OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
     OpenLayers.Util.onImageLoadErrorColor = "transparent";
+    OpenLayers.ImgPath = "http://js.mapbox.com/theme/dark/";
+
 
     var options = {
         controls: [],
@@ -21,8 +23,7 @@ $(function() {
     map = new OpenLayers.Map('map', options);
 
     // create Google Mercator layers
-    var gmap = new OpenLayers.Layer.Google("Google Streets",
-        { sphericalMercator: true, numZoomLevels: 21} );
+    var gmap = new OpenLayers.Layer.Google("Google Streets", { sphericalMercator: true, numZoomLevels: 21} );
 
     var layers = [gmap];
     var layer;
@@ -38,6 +39,12 @@ $(function() {
         }
         if ( pages[i].bounds.maxy < atlasBounds.maxy || atlasBounds.maxy === null ) {
             atlasBounds.maxy = pages[i].bounds.maxy;
+        }
+        if ( pages[i].minZoom < minZoom || minZoom === null ) {
+            minZoom = pages[i].minZoom;
+        }
+        if ( pages[i].maxZoom > maxZoom || maxZoom === null ) {
+            maxZoom = pages[i].maxZoom;
         }
 
         pages[i].bounds = new OpenLayers.Bounds(
@@ -86,8 +93,19 @@ $(function() {
     //if (OpenLayers.Util.alphaHack() == false) { tmsoverlay.setOpacity(0.7); }
 
     map.addLayers(layers);
+    var style_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+    style_blue.strokeColor = "darkred";
+    style_blue.fillColor = "darkred";
+    style_blue.fillOpacity = .05;
+    style_blue.pointRadius = 10;
+    style_blue.strokeWidth = 2;
+    style_blue.strokeLinecap = "butt";
+    style_blue.zIndex = 999;
 
-    switcherControl = new OpenLayers.Control.LayerSwitcher();
+    var featureLayer = new OpenLayers.Layer.Vector("layerBBox", { style: style_blue, displayInLayerSwitcher: false });
+    map.addLayer(featureLayer);
+
+    switcherControl = new OpenLayers.Control.LayerSwitcher({ roundedCornerColor: 'black' });
     map.addControl(switcherControl);
     switcherControl.maximizeControl();
 
@@ -98,7 +116,7 @@ $(function() {
                 showBoundingBox(layerId);
             },
             function() {
-                //hideBoundingBox(layerId);
+                hideBoundingBox();
             }
         );
     });
@@ -112,28 +130,14 @@ $(function() {
 
 });
 function showBoundingBox(layerId) {
-        //mapObj requires west, east, north, south
-//add or modify a layer with a vector representing the selected feature
-    var bounds;
-    var i;
+    var bounds, i, featureLayer = map.getLayersByName("layerBBox")[0];
+    featureLayer.removeAllFeatures();
+
     for (i in pages) {
         if (pages[i].layerId == layerId) {
             bounds = pages[i].bounds;
         }
     }
-
-    var featureLayer;
-    var style_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-    style_blue.strokeColor = "blue";
-    style_blue.fillColor = "blue";
-    style_blue.fillOpacity = .05;
-    style_blue.pointRadius = 10;
-    style_blue.strokeWidth = 2;
-    style_blue.strokeLinecap = "butt";
-    style_blue.zIndex = 999;
-
-    featureLayer = new OpenLayers.Layer.Vector("bBox" + layerId, { style: style_blue, displayInLayerSwitcher: false });
-    map.addLayer(featureLayer);
 
     var box = new OpenLayers.Feature.Vector(bounds.toGeometry());
     featureLayer.addFeatures([box]);
@@ -141,7 +145,6 @@ function showBoundingBox(layerId) {
     map.setLayerIndex(featureLayer, i + 1);
 }
 
-function hideBoundingBox(layerId) {
-    map.getLayersByName('bBox' + layerId)[0].destroy();
-    //featureLayer.destroy();
+function hideBoundingBox() {
+    map.getLayersByName('layerBBox')[0].removeAllFeatures();
 }
