@@ -7,3 +7,4 @@ app/cache/
 app/logs/
 parameters.ini
 web/bundles
+web/tiles
