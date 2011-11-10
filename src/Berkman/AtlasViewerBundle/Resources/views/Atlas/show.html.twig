@@ -1,3 +1,40 @@
+{% extends 'BerkmanAtlasViewerBundle::layout.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% stylesheets 'openlayers/theme/default/style.css'
+                   'openlayers/theme/default/google.css' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="../../../openlayers/OpenLayers.js"></script>
+    <script src="http://maps.google.com/maps/api/js?v=3.5&amp;sensor=false"></script>
+    <script>
+        var pages = [
+        {% for page in entity.pages %}
+            {
+                id: "{{ page.id }}",
+                name: "{{ page.name }}",
+                metadata: {{ page.metadata|json_encode|raw }},
+                bounds: {{ page.boundingBox|json_encode|raw }},
+                minZoom: {{ page.minZoomLevel }},
+                maxZoom: {{ page.maxZoomLevel }}
+            }, 
+        {% endfor %}
+        ],
+        atlasId = {{ entity.id }};
+    </script>
+    {% javascripts 
+                   '@BerkmanAtlasViewerBundle/Resources/public/js/atlas_show.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock javascripts %}
+
+{% block body %}
+<div id="metadata">
 <h1>Atlas</h1>
 
 <table class="record_properties">
@@ -43,3 +80,7 @@
         </form>
     </li>
 </ul>
+</div>
+
+<div id="map" style="width: 100%; height: 500px;"></div>
+{% endblock body %}

@@ -1,3 +1,6 @@
+{% extends 'BerkmanAtlasViewerBundle::layout.html.twig' %}
+
+{% block body %}
 <h1>Atlas creation</h1>
 
 <form action="{{ path('atlas_create') }}" method="post" {{ form_enctype(form) }}>
@@ -14,3 +17,11 @@
         </a>
     </li>
 </ul>
+{% endblock body %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts 'bundles/berkmanatlasviewer/js/atlas_new.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
