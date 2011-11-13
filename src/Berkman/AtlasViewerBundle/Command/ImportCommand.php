@@ -46,7 +46,7 @@ class ImportCommand extends ContainerAwareCommand
         $files = scandir('maps');
         $maps = array();
         foreach($files as $file) {
-            if (is_file('maps/'.$file) && pathinfo('maps/'.$file, PATHINFO_EXTENSION) == 'jp2') {
+            if (is_file('maps/'.$file) && in_array(pathinfo('maps/'.$file, PATHINFO_EXTENSION), array('jp2', 'tif'))) {
                 $maps[] = $file;
             }
         }
@@ -57,9 +57,9 @@ class ImportCommand extends ContainerAwareCommand
         }
         $i = 1;
         foreach($maps as $map) {
-            $outputDir = $input->getArgument('output-dir') . '/' . $i;
+            $outputDir = $input->getArgument('output-dir') . '/tmp/' . $i;
             if (!is_dir($outputDir)) {
-                mkdir($outputDir);
+                mkdir($outputDir, 0777, true);
             }
             $command = 'gdal2tiles.py -s ' . escapeshellarg('EPSG:' . $input->getArgument('epsg-code')) . ' -n -w none ' . escapeshellarg('maps/'.$map) . ' ' . escapeshellarg($outputDir) . ' &> /dev/null';
             exec($command);
@@ -98,5 +98,17 @@ class ImportCommand extends ContainerAwareCommand
 
         exec('rm -rf maps atlas.zip');
         $output->writeln('Finished');
+
+        $mailer = $this->getContainer()->get('mailer');
+        $message = \Swift_Message::newInstance()
+            ->setSubject('Atlas Viewer Tile Generation Status')
+            ->setFrom('jclark_symfony@gmail.com')
+            ->setTo($atlas->getOwner()->getEmail())
+            ->setBody($this->renderView('BerkmanAtlasViewer:Importer:email.txt.twig', array(
+                'name' => $atlas->getOwner()->getName(),
+                'atlas_id' => $atlas->getId()
+            )))
+        ;
+        $mailer->send($message);
     }
 }

@@ -21,6 +21,7 @@ class LoadTestData implements FixtureInterface
         $user->setEmailCanonical('justin@example.com');
         $user->setAlgorithm('sha512');
         $user->addRole('ROLE_USER');
+	$user->addRole('ROLE_SUPER_ADMIN');
         $user->setEnabled(true);
  
         $encoder = new MessageDigestPasswordEncoder();

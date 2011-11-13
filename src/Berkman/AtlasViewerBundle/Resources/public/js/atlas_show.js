@@ -24,8 +24,9 @@ $(function() {
 
     // create Google Mercator layers
     var gmap = new OpenLayers.Layer.Google("Google Streets", { sphericalMercator: true, numZoomLevels: 21} );
+    var ghyb = new OpenLayers.Layer.Google("Google Hybrid", {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 21});
 
-    var layers = [gmap];
+    var layers = [gmap, ghyb];
     var layer;
     for ( i in pages ) {
         if ( pages[i].bounds.minx < atlasBounds.minx || atlasBounds.minx === null ) {
@@ -142,7 +143,7 @@ function showBoundingBox(layerId) {
     var box = new OpenLayers.Feature.Vector(bounds.toGeometry());
     featureLayer.addFeatures([box]);
 
-    map.setLayerIndex(featureLayer, i + 1);
+    //map.setLayerIndex(featureLayer, pages.length);
 }
 
 function hideBoundingBox() {

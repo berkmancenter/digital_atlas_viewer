@@ -103,8 +103,11 @@ class AtlasController extends Controller
             $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
             $aclProvider->updateAcl($acl);
 
-
-            $process = new Process($_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/web/tiles/' . $entity->getId());
+            $command = $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/web/tiles/' . $entity->getId();
+            error_log($command);
+            $process = new Process($command);
+            $process->setTimeout(6 * 60 * 60);
+            $process->run();
 
             return $this->redirect($this->generateUrl('atlas_show', array('id' => $entity->getId())));
         }
@@ -198,6 +201,20 @@ class AtlasController extends Controller
         }
 
         return $this->redirect($this->generateUrl('atlas'));
+    }
+
+    /**
+     * Recreates the tiles of the atlas
+     *
+     */
+    public function recreateTilesAction($overwriteOld = true)
+    {
+        $command = $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/web/tiles/' . $entity->getId();
+        error_log($command);
+        $process = new Process($command);
+        $process->setTimeout(6 * 60 * 60);
+        $process->run();
+
     }
 
     private function createDeleteForm($id)
