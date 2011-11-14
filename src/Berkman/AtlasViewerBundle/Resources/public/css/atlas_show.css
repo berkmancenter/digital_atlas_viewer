@@ -1,6 +1,5 @@
 .layer-handle {
     width: 100%;
-    height: 15px;
     background-color: #666;
     border-radius: 2px;
     cursor: move;
@@ -8,9 +7,58 @@
 .layer-wrap {
     border: 1px solid #888;
     border-radius: 2px;
-    padding: 0 5px 5px;
-    margin: 10px 0;
+    margin: 10px auto;
+}
+.not-transparent {
+    background-color: #333;
+}
+.layer-inside-wrap {
+    padding: 10px;
+}
+.dataLayersDiv, .atlasButtonsDiv {
+    padding-right: 5px;
+    margin-right: 15px;
+}
+html, body, #map {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+#map {
+    height: 90%;
+}
+#metadata {
+    width: 100%;
+    height: 10%;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+    color: white;
+    overflow: hidden;
+    padding: 10px;
+}
+#metadata dl {
+    margin: 0;
+    padding: 0;
+}
+#metadata h1 {
+    margin: 0;
+    padding: 0;
 }
 .dataLayersDiv {
-    padding-right: 30px;
+    max-height: 80%;
+    overflow-y: auto;
+}
+.layersDiv {
+    opacity: 1.0 !important;
+    background-color: rgba(0, 0, 0, 0.75) !important;
+}
+.atlasLbl {
+    margin: 3px 0 3px 3px;
+}
+.atlasButtonsDiv {
+    padding-left: 10px;
 }

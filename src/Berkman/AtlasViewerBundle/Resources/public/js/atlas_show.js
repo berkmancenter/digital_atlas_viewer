@@ -4,9 +4,6 @@ $(function() {
         return $(this[0]).closest('.layer-wrap');
     };
 
-    $('#metadata').hide();
-    $('html, body, #map').css({ margin: 0, padding: 0, width: '100%', height: '100%' });
-
     var atlasBounds = { minx: null, miny: null, maxx: null, maxy: null }, minZoom = null, maxZoom = null;
 
     // avoid pink tiles
@@ -109,6 +106,7 @@ $(function() {
 
     var featureLayer = new OpenLayers.Layer.Vector("layerBBox", { style: style_blue, displayInLayerSwitcher: false });
     map.addLayer(featureLayer);
+    map.setLayerIndex(featureLayer, 1000);
 
     OpenLayers.Control.MyCustomLayerSwitcher =
         OpenLayers.Class(OpenLayers.Control.LayerSwitcher,{
@@ -117,6 +115,14 @@ $(function() {
                     this.isMouseDown = false;
              //     this.ignoreEvent(evt);
                 }
+            },
+            checkRedraw: function() {
+                var redraw = false;
+                if ( !this.layerStates.length ||
+                     (this.map.layers.length != this.layerStates.length) ) {
+                    redraw = true;
+                }
+                return redraw;
             },
             redraw: function (){
                 //if the state hasn't changed since last redraw, no need 
@@ -223,7 +229,22 @@ $(function() {
                             groupDiv.appendChild(labelSpan);
                             groupDiv.appendChild(br);
                         } else {
-                            $(groupDiv).append($('<div class="layer-wrap" id="' + layer.id + '-wrap" />').data('layerId', layer.id).append('<div class="layer-handle"/>').append($(inputElem).after(labelSpan).after('<div class="layer-opacity-slider"/>')));
+                            $(groupDiv).append(
+                                $('<div class="layer-wrap" id="' + layer.id + '-wrap" />')
+                                .data('layerId', layer.id)
+                                .html(
+                                    $('<div class="layer-handle"/>')
+                                    .append(
+                                        $(inputElem).after(labelSpan)
+                                    )
+                                )
+                                .append(
+                                    $('<div class="layer-inside-wrap" />')
+                                    .html('<div class="layer-opacity-slider"/>')
+                                    .append('<a class="layer-zoom" href="#"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png" /></a>')
+                                    .append('<a class="layer-raise" href="#"><img src="/DAV/web/bundles/berkmanatlasviewer/images/upload_6x12.png" /></a>')
+                                )
+                            );
                         }
                     }
                 }
@@ -236,6 +257,16 @@ $(function() {
 
                 var tempLayers = $(this.dataLayersDiv);
                 tempLayers.children().each(function(i,li){tempLayers.prepend(li)});
+
+                $(this.div).find('.layersDiv').append($(this.div).find('.baseLbl, .baseLayersDiv'));
+                $(this.div).find('.layersDiv').prepend(
+                    '<div class="atlasLbl">Atlas</div>' + 
+                    '<div class="atlasButtonsDiv">' + 
+                        '<a href="#" class="atlas-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
+                        '<div class="atlas-opacity-slider"/>' +
+                    '</div>'
+                );
+                $(this.dataLbl).html('Pages');
                 
                 $(this.dataLayersDiv).find('.layer-wrap').hover(
                     function(e) {
@@ -248,15 +279,53 @@ $(function() {
 
                 $(this.dataLayersDiv).find('.layer-opacity-slider').slider({
                     slide: function(e, ui) {
-                        var layerId  = $(ui.handle).parent().parent().data('layerId');
+                        var layerId  = $(ui.handle).getLayer().data('layerId');
+                        map.getLayer(layerId).setOpacity(ui.value / 100);
+                    },
+                    change: function(e, ui) {
+                        var layerId  = $(ui.handle).getLayer().data('layerId');
                         map.getLayer(layerId).setOpacity(ui.value / 100);
                     },
                     value: 100,
                     step: 5
                 });
 
+                $(this.div).find('.atlas-opacity-slider').slider({
+                    slide: function(e, ui) {
+                        //var layerId  = $(ui.handle).getLayer().data('layerId');
+                        //map.getLayer(layerId).setOpacity(ui.value / 100);
+                        $('.dataLayersDiv').find('.layer-opacity-slider').each(function() {
+                            $(this).slider('value', ui.value);
+                        });
+                    },
+                    value: 100,
+                    step: 10
+                });
+
+                $(this.div).find('.atlas-zoom').click(function(e) {
+                    map.zoomToExtent( new OpenLayers.Bounds( atlasBounds.miny, atlasBounds.minx, atlasBounds.maxy, atlasBounds.maxx ).transform(map.displayProjection, map.projection ) );
+                    e.preventDefault();
+                });
+
                 $(this.dataLayersDiv).find('.layer-opacity-slider').each(function() {
                     $(this).slider('value', (map.getLayer($(this).getLayer().data('layerId')).opacity || 1) * 100);
+                });
+
+                $(this.dataLayersDiv).find('.layer-zoom').click(function(e) {
+                    var i, bounds, layerId = $(this).getLayer().data('layerId');
+                    for (i in pages) {
+                        if (pages[i].layerId == layerId) {
+                            bounds = pages[i].bounds;
+                        }
+                    }
+                    map.zoomToExtent(bounds, true);
+                    e.preventDefault();
+                });
+
+                $(this.dataLayersDiv).find('.layer-raise').click(function(e) {
+                    var layerId = $(this).getLayer().data('layerId');
+                    $('.dataLayersDiv').prepend($(e.target).getLayer());
+                    map.setLayerIndex(map.getLayer(layerId), pages.length + 1);
                 });
 
                 return this.div;
@@ -279,15 +348,23 @@ $(function() {
     map.addControl(new OpenLayers.Control.KeyboardDefaults());
 
     $('.dataLayersDiv').sortable({
-        stop: function(e, ui) {
+        change: function(e, ui) {
             var $layer = $(e.target).getLayer(),
-                diff = $layer.data('startIndex') - $layer.parent().children().index($layer) + 1;
-            diff = diff > 0 ? diff - 1 : diff;
+                startIndex = $layer.data('startIndex'),
+                newIndex = $layer.parent().children().not('.ui-sortable-helper').index($layer.parent().find('.ui-sortable-placeholder')),
+                diff = startIndex - newIndex;
+            //console.log('startIndex: ' + startIndex + ' - newIndex: ' + newIndex + ' - diff: ' + diff);
+            $layer.data('startIndex', newIndex);
             map.raiseLayer(map.getLayer($layer.data('layerId')), diff);
         },
         start: function(e, ui) {
             var $layer = $(e.target).getLayer();
             $layer.data('startIndex', $layer.parent().children().index($layer));
+            $layer.addClass('not-transparent');
+        },
+        stop: function(e) {
+            var $layer = $(e.target).getLayer();
+            $layer.removeClass('not-transparent');
         },
         handle: '.layer-handle',
         axis: 'y'
@@ -305,8 +382,6 @@ function showBoundingBox(layerId) {
 
     var box = new OpenLayers.Feature.Vector(bounds.toGeometry());
     featureLayer.addFeatures([box]);
-
-    //map.setLayerIndex(featureLayer, pages.length);
 }
 
 function hideBoundingBox() {

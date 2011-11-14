@@ -37,53 +37,34 @@
 {% endblock javascripts %}
 
 {% block body %}
+<div id="map"></div>
 <div id="metadata">
-<h1>Atlas</h1>
+    <dl>
+        <dt>Name</dt>
+        <dd>{{ entity.name }}</dd>
 
-<table class="record_properties">
-    <tbody>
-        <tr>
-            <th>Id</th>
-            <td>{{ entity.id }}</td>
-        </tr>
-        <tr>
-            <th>Name</th>
-            <td>{{ entity.name }}</td>
-        </tr>
-        <tr>
-            <th>Description</th>
-            <td>{{ entity.description }}</td>
-        </tr>
-        <tr>
-            <th>Created</th>
-            <td>{{ entity.created|date('Y-m-d H:i:s') }}</td>
-        </tr>
-        <tr>
-            <th>Updated</th>
-            <td>{{ entity.updated|date('Y-m-d H:i:s') }}</td>
-        </tr>
-    </tbody>
-</table>
+        <dt>Description</dt>
+        <dd>{{ entity.description }}</dd>
+    </dl>
 
-<ul class="record_actions">
-    <li>
-        <a href="{{ path('atlas') }}">
-            Back to the list
-        </a>
-    </li>
-    <li>
-        <a href="{{ path('atlas_edit', { 'id': entity.id }) }}">
-            Edit
-        </a>
-    </li>
-    <li>
-        <form action="{{ path('atlas_delete', { 'id': entity.id }) }}" method="post">
-            {{ form_widget(delete_form) }}
-            <button type="submit">Delete</button>
-        </form>
-    </li>
-</ul>
+    <ul class="record_actions">
+        <li>
+            <a href="{{ path('atlas') }}">
+                Back to the list
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('atlas_edit', { 'id': entity.id }) }}">
+                Edit
+            </a>
+        </li>
+        <li>
+            <form action="{{ path('atlas_delete', { 'id': entity.id }) }}" method="post">
+                {{ form_widget(delete_form) }}
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+    </ul>
 </div>
 
-<div id="map" style="width: 100%; height: 500px;"></div>
 {% endblock body %}
