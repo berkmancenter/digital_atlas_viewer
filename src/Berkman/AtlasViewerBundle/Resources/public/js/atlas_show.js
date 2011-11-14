@@ -1,5 +1,9 @@
 var map, switcherControl;
 $(function() {
+    $.fn.getLayer = function() {
+        return $(this[0]).closest('.layer-wrap');
+    };
+
     $('#metadata').hide();
     $('html, body, #map').css({ margin: 0, padding: 0, width: '100%', height: '100%' });
 
@@ -106,21 +110,166 @@ $(function() {
     var featureLayer = new OpenLayers.Layer.Vector("layerBBox", { style: style_blue, displayInLayerSwitcher: false });
     map.addLayer(featureLayer);
 
-    switcherControl = new OpenLayers.Control.LayerSwitcher({ roundedCornerColor: 'black' });
+    OpenLayers.Control.MyCustomLayerSwitcher =
+        OpenLayers.Class(OpenLayers.Control.LayerSwitcher,{
+            mouseUp: function(evt) {
+                if (this.isMouseDown) {
+                    this.isMouseDown = false;
+             //     this.ignoreEvent(evt);
+                }
+            },
+            redraw: function (){
+                //if the state hasn't changed since last redraw, no need 
+                // to do anything. Just return the existing div.
+                if (!this.checkRedraw()) { 
+                    return this.div; 
+                } 
+
+                //clear out previous layers 
+                this.clearLayersArray("base");
+                this.clearLayersArray("data");
+                
+                var containsOverlays = false;
+                var containsBaseLayers = false;
+                
+                // Save state -- for checking layer if the map state changed.
+                // We save this before redrawing, because in the process of redrawing
+                // we will trigger more visibility changes, and we want to not redraw
+                // and enter an infinite loop.
+                var len = this.map.layers.length;
+                this.layerStates = new Array(len);
+                for (var i=0; i <len; i++) {
+                    var layer = this.map.layers[i];
+                    this.layerStates[i] = {
+                        'name': layer.name, 
+                        'visibility': layer.visibility,
+                        'inRange': layer.inRange,
+                        'id': layer.id
+                    };
+                }    
+
+                var layers = this.map.layers.slice();
+                if (!this.ascending) { layers.reverse(); }
+                for(var i=0, len=layers.length; i<len; i++) {
+                    var layer = layers[i];
+                    var baseLayer = layer.isBaseLayer;
+
+                    if (layer.displayInLayerSwitcher) {
+
+                        if (baseLayer) {
+                            containsBaseLayers = true;
+                        } else {
+                            containsOverlays = true;
+                        }    
+
+                        // only check a baselayer if it is *the* baselayer, check data
+                        //  layers if they are visible
+                        var checked = (baseLayer) ? (layer == this.map.baseLayer)
+                                                  : layer.getVisibility();
+            
+                        // create input element
+                        var inputElem = document.createElement("input");
+                        inputElem.id = this.id + "_input_" + layer.name;
+                        inputElem.name = (baseLayer) ? this.id + "_baseLayers" : layer.name;
+                        inputElem.type = (baseLayer) ? "radio" : "checkbox";
+                        inputElem.value = layer.name;
+                        inputElem.checked = checked;
+                        inputElem.defaultChecked = checked;
+
+                        if (!baseLayer && !layer.inRange) {
+                            inputElem.disabled = true;
+                        }
+                        var context = {
+                            'inputElem': inputElem,
+                            'layer': layer,
+                            'layerSwitcher': this
+                        };
+                        OpenLayers.Event.observe(inputElem, "mouseup", 
+                            OpenLayers.Function.bindAsEventListener(this.onInputClick,
+                                                                    context)
+                        );
+                        
+                        // create span
+                        var labelSpan = document.createElement("span");
+                        OpenLayers.Element.addClass(labelSpan, "labelSpan");
+                        if (!baseLayer && !layer.inRange) {
+                            labelSpan.style.color = "gray";
+                        }
+                        labelSpan.innerHTML = layer.name;
+                        labelSpan.style.verticalAlign = (baseLayer) ? "bottom" 
+                                                                    : "baseline";
+                        OpenLayers.Event.observe(labelSpan, "click", 
+                            OpenLayers.Function.bindAsEventListener(this.onInputClick,
+                                                                    context)
+                        );
+                        // create line break
+                        var br = document.createElement("br");
+            
+                        
+                        var groupArray = (baseLayer) ? this.baseLayers
+                                                     : this.dataLayers;
+                        groupArray.push({
+                            'layer': layer,
+                            'inputElem': inputElem,
+                            'labelSpan': labelSpan
+                        });
+                                                             
+            
+                        var groupDiv = (baseLayer) ? this.baseLayersDiv
+                                                   : this.dataLayersDiv;
+
+                        if (baseLayer) {
+                            groupDiv.appendChild(inputElem);
+                            groupDiv.appendChild(labelSpan);
+                            groupDiv.appendChild(br);
+                        } else {
+                            $(groupDiv).append($('<div class="layer-wrap" id="' + layer.id + '-wrap" />').data('layerId', layer.id).append('<div class="layer-handle"/>').append($(inputElem).after(labelSpan).after('<div class="layer-opacity-slider"/>')));
+                        }
+                    }
+                }
+
+                // if no overlays, dont display the overlay label
+                this.dataLbl.style.display = (containsOverlays) ? "" : "none";        
+                
+                // if no baselayers, dont display the baselayer label
+                this.baseLbl.style.display = (containsBaseLayers) ? "" : "none";        
+
+                var tempLayers = $(this.dataLayersDiv);
+                tempLayers.children().each(function(i,li){tempLayers.prepend(li)});
+                
+                $(this.dataLayersDiv).find('.layer-wrap').hover(
+                    function(e) {
+                        showBoundingBox($(e.target).getLayer().data('layerId'));
+                    },
+                    function() {
+                        hideBoundingBox();
+                    }
+                );
+
+                $(this.dataLayersDiv).find('.layer-opacity-slider').slider({
+                    slide: function(e, ui) {
+                        var layerId  = $(ui.handle).parent().parent().data('layerId');
+                        map.getLayer(layerId).setOpacity(ui.value / 100);
+                    },
+                    value: 100,
+                    step: 5
+                });
+
+                $(this.dataLayersDiv).find('.layer-opacity-slider').each(function() {
+                    $(this).slider('value', (map.getLayer($(this).getLayer().data('layerId')).opacity || 1) * 100);
+                });
+
+                return this.div;
+
+            },
+           CLASSNAME: "OpenLayers.Control.MyCustomLayerSwitcher"
+        })
+    ;
+
+    switcherControl = new OpenLayers.Control.MyCustomLayerSwitcher({ roundedCornerColor: 'black' });
     map.addControl(switcherControl);
     switcherControl.maximizeControl();
 
-    $(switcherControl.dataLayers).each(function() {
-        var layerId = this.layer.id;
-        $(this.inputElem, this.layerSpan).hover(
-            function() {
-                showBoundingBox(layerId);
-            },
-            function() {
-                hideBoundingBox();
-            }
-        );
-    });
 
     map.zoomToExtent( new OpenLayers.Bounds( atlasBounds.miny, atlasBounds.minx, atlasBounds.maxy, atlasBounds.maxx ).transform(map.displayProjection, map.projection ) );
 
@@ -129,6 +278,20 @@ $(function() {
     map.addControl(new OpenLayers.Control.MouseDefaults());
     map.addControl(new OpenLayers.Control.KeyboardDefaults());
 
+    $('.dataLayersDiv').sortable({
+        stop: function(e, ui) {
+            var $layer = $(e.target).getLayer(),
+                diff = $layer.data('startIndex') - $layer.parent().children().index($layer) + 1;
+            diff = diff > 0 ? diff - 1 : diff;
+            map.raiseLayer(map.getLayer($layer.data('layerId')), diff);
+        },
+        start: function(e, ui) {
+            var $layer = $(e.target).getLayer();
+            $layer.data('startIndex', $layer.parent().children().index($layer));
+        },
+        handle: '.layer-handle',
+        axis: 'y'
+    });
 });
 function showBoundingBox(layerId) {
     var bounds, i, featureLayer = map.getLayersByName("layerBBox")[0];

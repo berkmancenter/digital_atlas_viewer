@@ -3,6 +3,8 @@
 {% block stylesheets %}
     {{ parent() }}
     {% stylesheets 'openlayers/theme/default/style.css'
+                   '@BerkmanAtlasViewerBundle/Resources/public/css/ui-darkness/jquery-ui-1.8.16.custom.css'
+                   '@BerkmanAtlasViewerBundle/Resources/public/css/atlas_show.css'
                    'openlayers/theme/default/google.css' %}
     <link rel="stylesheet" href="{{ asset_url }}" />
     {% endstylesheets %}
@@ -28,7 +30,8 @@
         atlasId = {{ entity.id }};
     </script>
     {% javascripts 
-                   '@BerkmanAtlasViewerBundle/Resources/public/js/atlas_show.js' %}
+                   '@BerkmanAtlasViewerBundle/Resources/public/js/atlas_show.js'
+                   '@BerkmanAtlasViewerBundle/Resources/public/js/jquery-ui-1.8.16.custom.min.js' %}
     <script src="{{ asset_url }}"></script>
     {% endjavascripts %}
 {% endblock javascripts %}

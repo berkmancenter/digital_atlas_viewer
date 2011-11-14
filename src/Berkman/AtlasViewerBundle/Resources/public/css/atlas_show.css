@@ -1,0 +1,16 @@
+.layer-handle {
+    width: 100%;
+    height: 15px;
+    background-color: #666;
+    border-radius: 2px;
+    cursor: move;
+}
+.layer-wrap {
+    border: 1px solid #888;
+    border-radius: 2px;
+    padding: 0 5px 5px;
+    margin: 10px 0;
+}
+.dataLayersDiv {
+    padding-right: 30px;
+}
