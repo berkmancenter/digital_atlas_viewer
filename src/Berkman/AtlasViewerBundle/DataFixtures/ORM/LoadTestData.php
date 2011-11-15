@@ -17,11 +17,11 @@ class LoadTestData implements FixtureInterface
         $user = new Person();
         $user->setUsername('justin');
         $user->setUsernameCanonical('justin');
-        $user->setEmail('justin@example.com');
-        $user->setEmailCanonical('justin@example.com');
+        $user->setEmail('jclark@cyber.law.harvard.edu');
+        $user->setEmailCanonical('jclark@cyber.law.harvard.edu');
         $user->setAlgorithm('sha512');
         $user->addRole('ROLE_USER');
-	$user->addRole('ROLE_SUPER_ADMIN');
+        $user->addRole('ROLE_SUPER_ADMIN');
         $user->setEnabled(true);
  
         $encoder = new MessageDigestPasswordEncoder();
@@ -33,7 +33,7 @@ class LoadTestData implements FixtureInterface
         $atlas = new Atlas();
         $atlas->setName('Test');
         $atlas->setDescription('Test');
-        $atlas->setUrl('http://localhost/DAV/camb1900.zip');
+        $atlas->setUrl('http://localhost/DAV/small-test.zip');
         $atlas->setDefaultEpsgCode(102686);
         $atlas->setCreated(new \DateTime('now'));
         $atlas->setUpdated(new \DateTime('now'));

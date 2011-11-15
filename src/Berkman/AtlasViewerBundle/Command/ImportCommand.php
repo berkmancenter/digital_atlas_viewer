@@ -19,12 +19,15 @@ class ImportCommand extends ContainerAwareCommand
             ->addArgument('atlas-id', InputArgument::REQUIRED, 'The ID of the atlas to which these pages should be added')
             ->addArgument('url', InputArgument::REQUIRED, 'The URL of the ZIP file containing the atlas maps')
             ->addArgument('epsg-code', InputArgument::REQUIRED, 'The EPSG code of the maps in the atlas')
-            ->addArgument('output-dir', InputArgument::REQUIRED, 'The output directory for the tiles')
+            ->addArgument('doc-root', InputArgument::REQUIRED, 'The output directory for the tiles')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $cwd = $input->getArgument('doc-root') . '/DAV/tmp/';
+        chdir($cwd);
+        $numCores = exec('cat /proc/cpuinfo | grep processor | wc -l');
         $output->writeln('Finding the atlas...');
         $em = $this->getContainer()->get('doctrine')->getEntityManager();
         $atlas = $em->getRepository('BerkmanAtlasViewerBundle:Atlas')->find($input->getArgument('atlas-id'));
@@ -39,7 +42,7 @@ class ImportCommand extends ContainerAwareCommand
         $output->writeln('File download complete');
         $output->writeln('Starting unzip...');
 
-        exec('rm -rf maps & mkdir maps');
+        exec('rm -rf maps && mkdir maps');
         exec('unzip atlas.zip -d maps');
         $output->writeln('Unzip complete');
 
@@ -52,12 +55,13 @@ class ImportCommand extends ContainerAwareCommand
         }
         $output->writeln('Starting to generate tiles for ' . count($maps) . ' maps...');
 
-        if (!is_dir($input->getArgument('output-dir'))) {
-            mkdir($input->getArgument('output-dir'));
+        $tilesDir = $input->getArgument('doc-root') . '/DAV/web/tiles/' . $input->getArgument('atlas-id');
+        if (!is_dir($tilesDir)) {
+            mkdir($tilesDir);
         }
         $i = 1;
         foreach($maps as $map) {
-            $outputDir = $input->getArgument('output-dir') . '/tmp/' . $i;
+            $outputDir = $tilesDir . '/tmp/' . $i;
             if (!is_dir($outputDir)) {
                 mkdir($outputDir, 0777, true);
             }
@@ -90,7 +94,7 @@ class ImportCommand extends ContainerAwareCommand
             $em->persist($page);
             $em->flush();
 
-            rename($outputDir, $input->getArgument('output-dir') . '/' . $page->getId());
+            rename($outputDir, $tilesDir . '/' . $page->getId());
 
             $output->writeln('Finished ' . $i . '/' . count($maps));
             $i++;
@@ -104,10 +108,15 @@ class ImportCommand extends ContainerAwareCommand
             ->setSubject('Atlas Viewer Tile Generation Status')
             ->setFrom('jclark_symfony@gmail.com')
             ->setTo($atlas->getOwner()->getEmail())
-            ->setBody($this->renderView('BerkmanAtlasViewer:Importer:email.txt.twig', array(
-                'name' => $atlas->getOwner()->getName(),
-                'atlas_id' => $atlas->getId()
-            )))
+            ->setBody(
+                $this->getContainer()->get('templating')->render(
+                    'BerkmanAtlasViewerBundle:Importer:email.txt.twig',
+                    array(
+                        'name' => $atlas->getOwner()->getUsername(),
+                        'atlas_id' => $atlas->getId()
+                    )
+                )
+            )
         ;
         $mailer->send($message);
     }

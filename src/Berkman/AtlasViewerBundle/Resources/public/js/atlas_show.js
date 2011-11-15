@@ -49,7 +49,7 @@ $(function() {
             maxZoom = pages[i].maxZoom;
         }
 
-        pages[i].bounds = new OpenLayers.Bounds(
+        pages[i].oBounds = new OpenLayers.Bounds(
             pages[i].bounds.miny,
             pages[i].bounds.minx,
             pages[i].bounds.maxy,
@@ -72,7 +72,7 @@ $(function() {
 
                     for ( i in pages ) {
                         if (this.id == pages[i].layerId) {
-                            var mapBounds = pages[i].bounds,
+                            var mapBounds = pages[i].oBounds,
                                 pageId = pages[i].id,
                                 minZoom = pages[i].minZoom,
                                 maxZoom = pages[i].maxZoom;
@@ -92,8 +92,6 @@ $(function() {
         layers.push(layer);
     }
 
-    //if (OpenLayers.Util.alphaHack() == false) { tmsoverlay.setOpacity(0.7); }
-
     map.addLayers(layers);
     var style_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
     style_blue.strokeColor = "darkred";
@@ -107,6 +105,7 @@ $(function() {
     var featureLayer = new OpenLayers.Layer.Vector("layerBBox", { style: style_blue, displayInLayerSwitcher: false });
     map.addLayer(featureLayer);
     map.setLayerIndex(featureLayer, 1000);
+
 
     OpenLayers.Control.MyCustomLayerSwitcher =
         OpenLayers.Class(OpenLayers.Control.LayerSwitcher,{
@@ -229,6 +228,7 @@ $(function() {
                             groupDiv.appendChild(labelSpan);
                             groupDiv.appendChild(br);
                         } else {
+                            $(inputElem).addClass('layer-toggle');
                             $(groupDiv).append(
                                 $('<div class="layer-wrap" id="' + layer.id + '-wrap" />')
                                 .data('layerId', layer.id)
@@ -262,7 +262,10 @@ $(function() {
                 $(this.div).find('.layersDiv').prepend(
                     '<div class="atlasLbl">Atlas</div>' + 
                     '<div class="atlasButtonsDiv">' + 
-                        '<a href="#" class="atlas-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
+                        '<a href="#" title="Zoom to entire atlas" class="atlas-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
+                        '<a href="#" title="Zoom to visible pages" class="multi-layer-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
+                        '<a href="#" title="Hide all pages" class="multi-layer-hide"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/></a>' +
+                        '<a href="#" title="Show all pages" class="multi-layer-show"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/></a>' +
                         '<div class="atlas-opacity-slider"/>' +
                     '</div>'
                 );
@@ -292,8 +295,6 @@ $(function() {
 
                 $(this.div).find('.atlas-opacity-slider').slider({
                     slide: function(e, ui) {
-                        //var layerId  = $(ui.handle).getLayer().data('layerId');
-                        //map.getLayer(layerId).setOpacity(ui.value / 100);
                         $('.dataLayersDiv').find('.layer-opacity-slider').each(function() {
                             $(this).slider('value', ui.value);
                         });
@@ -303,7 +304,49 @@ $(function() {
                 });
 
                 $(this.div).find('.atlas-zoom').click(function(e) {
-                    map.zoomToExtent( new OpenLayers.Bounds( atlasBounds.miny, atlasBounds.minx, atlasBounds.maxy, atlasBounds.maxx ).transform(map.displayProjection, map.projection ) );
+                    map.zoomToExtent( new OpenLayers.Bounds( atlasBounds.miny, atlasBounds.minx, atlasBounds.maxy, atlasBounds.maxx ).transform(map.displayProjection, map.projection ), true );
+                    e.preventDefault();
+                });
+
+                $(this.div).find('.multi-layer-zoom').click(function(e) {
+                    var minx = null, miny = null, maxx = null, maxy = null;
+                    for( i in pages ) {
+                        if ( map.getLayer(pages[i].layerId).getVisibility() ) {
+                            if ( pages[i].bounds.minx < minx || minx === null ) {
+                                minx = pages[i].bounds.minx;
+                            }
+                            if ( pages[i].bounds.miny < miny || miny === null ) {
+                                miny = pages[i].bounds.miny;
+                            }
+                            if ( pages[i].bounds.maxx > maxx || maxx === null ) {
+                                maxx = pages[i].bounds.maxx;
+                            }
+                            if ( pages[i].bounds.maxy < maxy || maxy === null ) {
+                                maxy = pages[i].bounds.maxy;
+                            }
+                        }
+                    }
+                    map.zoomToExtent( new OpenLayers.Bounds( miny, minx, maxy, maxx ).transform(map.displayProjection, map.projection ), true );
+                    e.preventDefault();
+                });
+
+                $(this.div).find('.multi-layer-show').click(function(e) {
+                    for ( i in map.layers ) {
+                        if (!map.layers[i].isBaseLayer && map.layers[i].name != 'layerBBox') {
+                            map.layers[i].setVisibility(true);
+                            $('.layer-toggle').attr('checked', true);
+                        }
+                    }
+                    e.preventDefault();
+                });
+
+                $(this.div).find('.multi-layer-hide').click(function(e) {
+                    for ( i in map.layers ) {
+                        if (!map.layers[i].isBaseLayer && map.layers[i].name != 'layerBBox') {
+                            map.layers[i].setVisibility(false);
+                            $('.layer-toggle').attr('checked', false);
+                        }
+                    }
                     e.preventDefault();
                 });
 
@@ -315,7 +358,7 @@ $(function() {
                     var i, bounds, layerId = $(this).getLayer().data('layerId');
                     for (i in pages) {
                         if (pages[i].layerId == layerId) {
-                            bounds = pages[i].bounds;
+                            bounds = pages[i].oBounds;
                         }
                     }
                     map.zoomToExtent(bounds, true);
@@ -340,12 +383,53 @@ $(function() {
     switcherControl.maximizeControl();
 
 
-    map.zoomToExtent( new OpenLayers.Bounds( atlasBounds.miny, atlasBounds.minx, atlasBounds.maxy, atlasBounds.maxx ).transform(map.displayProjection, map.projection ) );
+    OpenLayers.Control.TestClick = OpenLayers.Class(OpenLayers.Control, {                
+        defaultHandlerOptions: {
+            'single': false,
+            'double': true,
+            'pixelTolerance': 0,
+            'stopSingle': false,
+            'stopDouble': true
+        },
+        
+
+        initialize: function(options) {
+            this.handlerOptions = OpenLayers.Util.extend(
+                {}, this.defaultHandlerOptions
+            );
+            OpenLayers.Control.prototype.initialize.apply(
+                this, arguments
+            ); 
+            this.handler = new OpenLayers.Handler.Click(
+                this, {
+                    'dblclick': this.onClick 
+                }, this.handlerOptions
+            );
+        }, 
+
+        onClick: function(e) {
+            var lonLat = map.getLonLatFromViewPortPx(e.xy), popup, layerIds = [], $html = $('<p>Pages here:</p><ul/>');
+            for ( i in pages ) {
+                if (pages[i].oBounds.containsLonLat(lonLat)) {
+                    $html.append('<li>' + map.getLayer(pages[i].layerId).name + '</li>');
+                }
+            }
+
+            popup = new OpenLayers.Popup(null, lonLat, new OpenLayers.Size(100, 100), $html.html(), true);
+            popup.autosize = true;
+            map.addPopup(popup, true);
+        },
+    });
+
+    map.zoomToExtent( new OpenLayers.Bounds( atlasBounds.miny, atlasBounds.minx, atlasBounds.maxy, atlasBounds.maxx ).transform(map.displayProjection, map.projection ), true );
 
     map.addControl(new OpenLayers.Control.PanZoomBar());
     map.addControl(new OpenLayers.Control.MousePosition());
     map.addControl(new OpenLayers.Control.MouseDefaults());
     map.addControl(new OpenLayers.Control.KeyboardDefaults());
+    var testClick = new OpenLayers.Control.TestClick();
+    map.addControl(testClick);
+    testClick.activate();
 
     $('.dataLayersDiv').sortable({
         change: function(e, ui) {
@@ -353,7 +437,7 @@ $(function() {
                 startIndex = $layer.data('startIndex'),
                 newIndex = $layer.parent().children().not('.ui-sortable-helper').index($layer.parent().find('.ui-sortable-placeholder')),
                 diff = startIndex - newIndex;
-            //console.log('startIndex: ' + startIndex + ' - newIndex: ' + newIndex + ' - diff: ' + diff);
+            console.log('startIndex: ' + startIndex + ' - newIndex: ' + newIndex + ' - diff: ' + diff);
             $layer.data('startIndex', newIndex);
             map.raiseLayer(map.getLayer($layer.data('layerId')), diff);
         },
@@ -376,7 +460,7 @@ function showBoundingBox(layerId) {
 
     for (i in pages) {
         if (pages[i].layerId == layerId) {
-            bounds = pages[i].bounds;
+            bounds = pages[i].oBounds;
         }
     }
 

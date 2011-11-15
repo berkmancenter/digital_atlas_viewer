@@ -84,6 +84,7 @@ class AtlasController extends Controller
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getEntityManager();
             $user = $this->get('security.context')->getToken()->getUser();
+            $entity->setOwner($user);
             $entity->setCreated(new \DateTime('now'));
             $entity->setUpdated(new \DateTime('now'));
 
@@ -103,12 +104,10 @@ class AtlasController extends Controller
             $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
             $aclProvider->updateAcl($acl);
 
-            $command = $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/web/tiles/' . $entity->getId();
-            error_log($command);
-            $process = new Process($command);
-            $process->setTimeout(6 * 60 * 60);
-            $process->run();
+            $command = 'nice ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . ' 2>&1 > /dev/null &';
 
+            exec($command);
+            error_log($command);
             return $this->redirect($this->generateUrl('atlas_show', array('id' => $entity->getId())));
         }
 
