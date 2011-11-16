@@ -1,0 +1,15 @@
+Berkman\AtlasViewerBundle\Entity\TilingJob:
+  type: entity
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    command:
+      type: string
+    timeout:
+      type: integer
+    pid:
+      type: integer
+      nullable: true
