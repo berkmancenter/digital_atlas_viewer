@@ -9,6 +9,7 @@ use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Process\Process;
 
 use Berkman\AtlasViewerBundle\Entity\Atlas;
+use Berkman\AtlasViewerBundle\Entity\TilingJob;
 use Berkman\AtlasViewerBundle\Form\AtlasType;
 
 /**
@@ -104,11 +105,13 @@ class AtlasController extends Controller
             $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
             $aclProvider->updateAcl($acl);
 
-            $command = 'nice ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . ' 2>&1 > /dev/null &';
+            $command = 'nice php ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:atlas:import ' . escapeshellarg($entity->getId()) . ' ' . escapeshellarg($entity->getUrl()) . ' ' . escapeshellarg($entity->getDefaultEpsgCode()) . ' ' . escapeshellarg($_SERVER['DOCUMENT_ROOT']);
 
-            exec($command);
-            error_log($command);
-            return $this->redirect($this->generateUrl('atlas_show', array('id' => $entity->getId())));
+            $tilingJob = new TilingJob($command, 6 * 60 * 60);
+            $em->persist($tilingJob);
+            $em->flush();
+
+            return $this->render('BerkmanAtlasViewerBundle:Atlas:pending.html.twig', array('email' => $user->getEmail()));
         }
 
         return $this->render('BerkmanAtlasViewerBundle:Atlas:new.html.twig', array(
