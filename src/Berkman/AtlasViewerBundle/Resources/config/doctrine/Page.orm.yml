@@ -12,12 +12,18 @@ Berkman\AtlasViewerBundle\Entity\Page:
       type: integer
     metadata:
       type: array
+    filename:
+      type: string
+      nullable: true
     bounding_box:
       type: array
+      nullable: true
     min_zoom_level:
       type: integer
+      nullable: true
     max_zoom_level:
       type: integer
+      nullable: true
   manyToOne:
     atlas:
       targetEntity: Atlas

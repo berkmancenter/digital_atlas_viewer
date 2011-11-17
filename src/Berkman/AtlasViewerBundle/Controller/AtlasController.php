@@ -105,11 +105,6 @@ class AtlasController extends Controller
             $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
             $aclProvider->updateAcl($acl);
 
-            $command = 'nice php ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:atlas:import ' . escapeshellarg($entity->getId()) . ' ' . escapeshellarg($entity->getUrl()) . ' ' . escapeshellarg($entity->getDefaultEpsgCode()) . ' ' . escapeshellarg($_SERVER['DOCUMENT_ROOT']);
-
-            $tilingJob = new TilingJob($command, 6 * 60 * 60);
-            $em->persist($tilingJob);
-            $em->flush();
 
             return $this->render('BerkmanAtlasViewerBundle:Atlas:pending.html.twig', array('email' => $user->getEmail()));
         }
@@ -211,6 +206,7 @@ class AtlasController extends Controller
      */
     public function recreateTilesAction($overwriteOld = true)
     {
+            $this->get('kernel')->getRootDir();
         $command = $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/web/tiles/' . $entity->getId();
         error_log($command);
         $process = new Process($command);

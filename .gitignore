@@ -8,3 +8,5 @@ app/logs/
 parameters.ini
 web/bundles
 web/tiles
+web/js
+tmp/

@@ -54,9 +54,12 @@ class Atlas
      */
     private $owner;
 
-    public function __construct()
+    public function __construct($importUrl = null, $workingDir = null, $outputDir = null)
     {
         $this->pages = new \Doctrine\Common\Collections\ArrayCollection();
+        if ($importUrl && $workingDir && $outputDir) {
+            $this->import($importUrl, $workingDir, $outputDir);
+        }
     }
     
     /**
@@ -227,5 +230,9 @@ class Atlas
     public function getOwner()
     {
         return $this->owner;
+    }
+
+    public function import($importUrl, $workingDir, $outputDir)
+    {
     }
 }
