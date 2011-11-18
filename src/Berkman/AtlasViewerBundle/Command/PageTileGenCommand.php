@@ -109,18 +109,18 @@ class PageTileGenCommand extends ContainerAwareCommand
 
         if ($input->hasOption('send-email')) {
             $mailer = $this->getContainer()->get('mailer');
-            $successMessage = 'The tiles were generated successfully.';
-            $successMessage .= ".\r\n\r\nTo view the atlas, visit: " 
+            $successMessage = 'The tiles for this page were generated successfully.';
+            $successMessage .= "\r\n\r\nTo view the atlas, visit: " 
                 . $this->getContainer()->get('router')->generate('atlas_show', array( 'id' => $page->getAtlas()->getId()), true);
             $message = \Swift_Message::newInstance()
                 ->setSubject('Digital Atlas Viewer - Task Completed')
                 ->setFrom('jclark.symfony@gmail.com')
-                ->setTo($atlas->getOwner()->getEmail())
+                ->setTo($page->getAtlas()->getOwner()->getEmail())
                 ->setBody(
                     $this->getContainer()->get('templating')->render(
                         'BerkmanAtlasViewerBundle:Email:successEmail.txt.twig',
                         array(
-                            'name' => $atlas->getOwner()->getUsername(),
+                            'name' => $page->getAtlas()->getOwner()->getUsername(),
                             'message' => $successMessage
                         )
                     )
