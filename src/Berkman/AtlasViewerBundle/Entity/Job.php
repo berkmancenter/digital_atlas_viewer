@@ -79,4 +79,29 @@ class Job
     {
         return $this->timeout;
     }
+    /**
+     * @var string $alert_email
+     */
+    private $alert_email;
+
+
+    /**
+     * Set alert_email
+     *
+     * @param string $alertEmail
+     */
+    public function setAlertEmail($alertEmail)
+    {
+        $this->alert_email = $alertEmail;
+    }
+
+    /**
+     * Get alert_email
+     *
+     * @return string 
+     */
+    public function getAlertEmail()
+    {
+        return $this->alert_email;
+    }
 }

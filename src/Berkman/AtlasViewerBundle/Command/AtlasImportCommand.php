@@ -26,6 +26,7 @@ class AtlasImportCommand extends ContainerAwareCommand
             ->setDescription('Download a zip, extract the map files, and generate pages from the maps')
             ->addArgument('atlas-id', InputArgument::REQUIRED, 'The ID of the atlas to import')
             ->addArgument('working-dir', InputArgument::REQUIRED, 'The directory in which to work')
+            ->addArgument('alert-email', InputArgument::OPTIONAL, 'An email address to send alerts to')
         ;
     }
 
@@ -99,28 +100,31 @@ class AtlasImportCommand extends ContainerAwareCommand
             $page->setFilename($file->getFilename());
             $page->setAtlas($atlas);
             $em->persist($page);
+            $count++;
         }
         $em->persist($atlas);
         $em->flush();
 
         $output->writeln('Found and created ' . iterator_count($finder) . ' pages.');
 
-        /*$mailer = $this->getContainer()->get('mailer');
-        $message = \Swift_Message::newInstance()
-            ->setSubject('Atlas Viewer - Tile Generation Completed')
-            ->setFrom('jclark.symfony@gmail.com')
-            ->setTo($atlas->getOwner()->getEmail())
-            ->setBody(
-                $this->getContainer()->get('templating')->render(
-                    'BerkmanAtlasViewerBundle:Importer:successEmail.txt.twig',
-                    array(
-                        'name' => $atlas->getOwner()->getUsername(),
-                        'atlas_id' => $atlas->getId()
+        if ($input->hasArgument('alert-email')) {
+            $mailer = $this->getContainer()->get('mailer');
+            $message = \Swift_Message::newInstance()
+                ->setSubject('Atlas Viewer - Tile Generation Completed')
+                ->setFrom('jclark.symfony@gmail.com')
+                ->setTo($atlas->getOwner()->getEmail())
+                ->setBody(
+                    $this->getContainer()->get('templating')->render(
+                        'BerkmanAtlasViewerBundle:Importer:successEmail.txt.twig',
+                        array(
+                            'name' => $atlas->getOwner()->getUsername(),
+                            'atlas_id' => $atlas->getId()
+                        )
                     )
                 )
-            )
-        ;
-        $mailer->send($message);*/
+            ;
+            $mailer->send($message);
+        }
     }
 
     private function sendErrorEmail($errorMsg, $atlas) {

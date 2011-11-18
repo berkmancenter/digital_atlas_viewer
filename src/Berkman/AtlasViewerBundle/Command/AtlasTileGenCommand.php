@@ -21,6 +21,7 @@ class AtlasTileGenCommand extends ContainerAwareCommand
             ->addArgument('atlas-id', InputArgument::REQUIRED, 'The ID of the atlas')
             ->addArgument('working-dir', InputArgument::REQUIRED, 'The directory in which to work')
             ->addArgument('output-dir', InputArgument::REQUIRED, 'The web-accessible directory')
+            ->addArgument('alert-email', InputArgument::OPTIONAL, 'An email address to send alerts to')
         ;
     }
 
