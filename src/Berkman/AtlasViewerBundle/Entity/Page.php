@@ -201,14 +201,6 @@ class Page
         return $this->max_zoom_level;
     }
 
-    public function generateTiles($pathToConsole, $outputDir)
-    {
-        // Run the script to generate tiles
-        $command = 'gdal2tiles.py -n -w none -s ' . escapeshellarg('EPSG:' . $this->getEpsgCode()) .
-                   ' ' . escapeshellarg($this->getFilename()) . ' ' . escapeshellarg($outputDir);
-
-        $job = new Job($command, self::TILE_GEN_TIMEOUT);
-    }
     /**
      * @var string $filename
      */
@@ -234,4 +226,30 @@ class Page
     {
         return $this->filename;
     }
+
+    public function removeTiles()
+    {
+        $tilesDir = __DIR__ . '/../../../../web/tiles/' . $this->getAtlas()->getId() . '/' . $this->getId();
+        $this->emptyDir($tilesDir, true);
+    }
+
+    private function emptyDir($dir, $remove = false) { 
+        if (is_dir($dir)) { 
+            $objects = scandir($dir); 
+            foreach ($objects as $object) { 
+                if ($object != "." && $object != "..") { 
+                    if (filetype($dir."/".$object) == "dir") {
+                        $this->emptyDir($dir."/".$object, true);
+                    }
+                    else {
+                        unlink($dir."/".$object); 
+                    }
+                } 
+            } 
+            reset($objects); 
+            if ($remove == true) {
+                rmdir($dir);
+            }
+        } 
+    } 
 }

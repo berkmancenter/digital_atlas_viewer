@@ -23,7 +23,7 @@ class PageTileGenCommand extends ContainerAwareCommand
             ->addArgument('page-id', InputArgument::REQUIRED, 'The ID of the page')
             ->addArgument('working-dir', InputArgument::REQUIRED, 'The directory in which to work')
             ->addArgument('output-dir', InputArgument::REQUIRED, 'The web-accessible directory')
-            ->addArgument('alert-email', InputArgument::OPTIONAL, 'An email address to send alerts to')
+            ->addOption('send-email', 'm', InputOption::VALUE_NONE, 'Whether or not to send an email to the atlas owner when the process completes')
         ;
     }
 
@@ -73,6 +73,9 @@ class PageTileGenCommand extends ContainerAwareCommand
             rename($tmpTileDir, $outputDir);
         }
         else {
+            $errorMsg = 'We couldn\'t make tiles from the file: ' . $page->getFilename() . ".\r\n\r\n"
+                . "The error reported was:\r\n\r\n" . $process->getErrorOutput();
+            $this->sendErrorEmail($errorMsg, $page->getAtlas());
             throw new \ErrorException('Could not make tiles for file: ' . $mapFile, self::TILE_GEN_FAILED_CODE);
         }
         $output->writeln('Tile generation complete.');
@@ -103,17 +106,39 @@ class PageTileGenCommand extends ContainerAwareCommand
         $em->persist($page);
         $em->flush();
         $output->writeln('Finished');
+
+        if ($input->hasOption('send-email')) {
+            $mailer = $this->getContainer()->get('mailer');
+            $successMessage = 'The tiles were generated successfully.';
+            $successMessage .= ".\r\n\r\nTo view the atlas, visit: " 
+                . $this->getContainer()->get('router')->generate('atlas_show', array( 'id' => $atlas->getId()), true);
+            $message = \Swift_Message::newInstance()
+                ->setSubject('Digital Atlas Viewer - Task Completed')
+                ->setFrom('jclark.symfony@gmail.com')
+                ->setTo($atlas->getOwner()->getEmail())
+                ->setBody(
+                    $this->getContainer()->get('templating')->render(
+                        'BerkmanAtlasViewerBundle:Email:successEmail.txt.twig',
+                        array(
+                            'name' => $atlas->getOwner()->getUsername(),
+                            'message' => $successMessage
+                        )
+                    )
+                )
+            ;
+            $mailer->send($message);
+        }
     }
 
     private function sendErrorEmail($errorMsg, $atlas) {
         $mailer = $this->getContainer()->get('mailer');
         $message = \Swift_Message::newInstance()
-            ->setSubject('Atlas Viewer - Tile Generation Failure')
+            ->setSubject('Digital Atlas Viewer - Tile Generation Failure')
             ->setFrom('jclark.symfony@gmail.com')
             ->setTo($atlas->getOwner()->getEmail())
             ->setBody(
                 $this->getContainer()->get('templating')->render(
-                    'BerkmanAtlasViewerBundle:Importer:errorEmail.txt.twig',
+                    'BerkmanAtlasViewerBundle:Email:errorEmail.txt.twig',
                     array(
                         'name' => $atlas->getOwner()->getUsername(),
                         'error' => $errorMsg

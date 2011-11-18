@@ -42,7 +42,13 @@ class RunJobCommand extends ContainerAwareCommand
             if ($job) {
                 $process = new Process($job->getCommand());
                 $process->setTimeout($job->getTimeout());
-                $process->run();
+                $process->run(function ($type, $buffer) use ($output) {
+                    if ('err' === $type) {
+                        $output->writeln('ERR > '.$buffer);
+                    } else {
+                        $output->writeln('OUT > '.$buffer);
+                    }
+                });
                 if ($process->isSuccessful()) {
                     $em->remove($job);
                     $em->flush();

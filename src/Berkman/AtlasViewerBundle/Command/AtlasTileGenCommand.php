@@ -21,7 +21,7 @@ class AtlasTileGenCommand extends ContainerAwareCommand
             ->addArgument('atlas-id', InputArgument::REQUIRED, 'The ID of the atlas')
             ->addArgument('working-dir', InputArgument::REQUIRED, 'The directory in which to work')
             ->addArgument('output-dir', InputArgument::REQUIRED, 'The web-accessible directory')
-            ->addArgument('alert-email', InputArgument::OPTIONAL, 'An email address to send alerts to')
+            ->addOption('send-email', 'm', InputOption::VALUE_NONE, 'Whether or not to send an email to the atlas owner when the process completes')
         ;
     }
 
@@ -40,8 +40,9 @@ class AtlasTileGenCommand extends ContainerAwareCommand
         $numPages = count($pages);
         $output->writeln('Generating tiles for ' . $numPages . ' pages...');
 
-        $i = 1;
+        $i = 0;
         foreach ($pages as $page) {
+            $i++;
             $command = $this->getApplication()->find('atlas_viewer:page:generate_tiles');
 
             $arguments = array(
@@ -54,46 +55,29 @@ class AtlasTileGenCommand extends ContainerAwareCommand
             $input = new ArrayInput($arguments);
             $command->run($input, $output);
             $output->writeln('Finished page ' . $i . '/' . $numPages);
-            $i++;
         }
-    }
 
-    private function sendErrorEmail($errorMsg, $atlas) {
-        $mailer = $this->getContainer()->get('mailer');
-        $message = \Swift_Message::newInstance()
-            ->setSubject('Atlas Viewer - Tile Generation Failure')
-            ->setFrom('jclark.symfony@gmail.com')
-            ->setTo($atlas->getOwner()->getEmail())
-            ->setBody(
-                $this->getContainer()->get('templating')->render(
-                    'BerkmanAtlasViewerBundle:Importer:errorEmail.txt.twig',
-                    array(
-                        'name' => $atlas->getOwner()->getUsername(),
-                        'error' => $errorMsg
+        if ($input->hasOption('send-email')) {
+            $mailer = $this->getContainer()->get('mailer');
+            $successMessage = 'We successfully generated tiles for ' . $i . ' page';
+            $successMessage .= $i > 1 ? 's' : '';
+            $successMessage .= ".\r\n\r\nTo view the atlas, visit: " 
+                . $this->getContainer()->get('router')->generate('atlas_show', array( 'id' => $atlas->getId()), true);
+            $message = \Swift_Message::newInstance()
+                ->setSubject('Digital Atlas Viewer - Task Completed')
+                ->setFrom('jclark.symfony@gmail.com')
+                ->setTo($atlas->getOwner()->getEmail())
+                ->setBody(
+                    $this->getContainer()->get('templating')->render(
+                        'BerkmanAtlasViewerBundle:Email:successEmail.txt.twig',
+                        array(
+                            'name' => $atlas->getOwner()->getUsername(),
+                            'message' => $successMessage
+                        )
                     )
                 )
-            )
-        ;
-        $mailer->send($message);
+            ;
+            $mailer->send($message);
+        }
     }
-
-    private function emptyDir($dir, $remove = false) { 
-        if (is_dir($dir)) { 
-            $objects = scandir($dir); 
-            foreach ($objects as $object) { 
-                if ($object != "." && $object != "..") { 
-                    if (filetype($dir."/".$object) == "dir") {
-                        $this->emptyDir($dir."/".$object, true);
-                    }
-                    else {
-                        unlink($dir."/".$object); 
-                    }
-                } 
-            } 
-            reset($objects); 
-            if ($remove == true) {
-                rmdir($dir);
-            }
-        } 
-    } 
 }

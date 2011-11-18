@@ -28,3 +28,5 @@ Berkman\AtlasViewerBundle\Entity\Page:
     atlas:
       targetEntity: Atlas
       inversedBy: pages
+  lifecycleCallbacks:
+    preRemove: [ removeTiles ]

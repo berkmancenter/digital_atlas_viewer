@@ -2,12 +2,13 @@
 
 {% block body %}
 <p>
-    We've started to process the atlas.
+    We've added the task you requested to the queue.
 </p>
 <p>
-    You'll receive an email at {{ email }} when the process is complete.
+    You'll receive an email when your task is complete.
 </p>
 <p>
     Sit back and relax - this may take a while.
 </p>
+<a href="{{ path('BerkmanAtlasViewerBundle_homepage') }}">Back to Home</a>
 {% endblock %}

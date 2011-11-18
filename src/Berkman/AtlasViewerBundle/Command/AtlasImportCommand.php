@@ -9,6 +9,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Finder\Finder;
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 use Berkman\AtlasViewerBundle\Entity\Page;
 
 class AtlasImportCommand extends ContainerAwareCommand
@@ -26,7 +28,8 @@ class AtlasImportCommand extends ContainerAwareCommand
             ->setDescription('Download a zip, extract the map files, and generate pages from the maps')
             ->addArgument('atlas-id', InputArgument::REQUIRED, 'The ID of the atlas to import')
             ->addArgument('working-dir', InputArgument::REQUIRED, 'The directory in which to work')
-            ->addArgument('alert-email', InputArgument::OPTIONAL, 'An email address to send alerts to')
+            ->addOption('send-email', 'm', InputOption::VALUE_NONE, 'Whether or not to send an email to the atlas owner when the process completes')
+            ->addOption('overwrite', null, InputOption::VALUE_NONE, 'Remove all pages from atlas before adding new pages')
         ;
     }
 
@@ -40,6 +43,19 @@ class AtlasImportCommand extends ContainerAwareCommand
             throw new \ErrorException('Could not find atlas.');
         }
         $output->writeln('Found atlas.');
+
+        // Remove existing pages from atlas
+        if ($input->hasOption('overwrite')) {
+            $pages = $atlas->getPages();
+            foreach($pages as $page) {
+                $em->remove($page);
+            }
+            $atlas->setPages(new ArrayCollection());
+            $em->flush();
+            // Remove tiles
+            //$this->emptyDir(
+        }
+
 
         // Prepare the current working directory
         $workingDir = $input->getArgument('working-dir') . '/' . $atlas->getId();
@@ -60,7 +76,10 @@ class AtlasImportCommand extends ContainerAwareCommand
         $process->setTimeout(self::DOWNLOAD_TIMEOUT);
         $process->run();
         if (!$process->isSuccessful()) {
-            throw new \ErrorException('Could not fetch an atlas from: ' . $url, self::DOWNLOAD_FAILED_CODE);
+            $errorMsg = 'We couldn\'t download the atlas from: ' . $importUrl . ".\r\n\r\n"
+                . "The error reported was:\r\n\r\n" . $process->getErrorOutput();
+            $this->sendErrorEmail($errorMsg, $atlas);
+            throw new \ErrorException('Could not fetch an atlas from: ' . $importUrl, self::DOWNLOAD_FAILED_CODE);
         }
         $output->writeln('File download complete.');
 
@@ -70,7 +89,10 @@ class AtlasImportCommand extends ContainerAwareCommand
         $process->setTimeout(self::UNZIP_TIMEOUT);
         $process->run();
         if (!$process->isSuccessful()) {
-            throw new \ErrorException('Could not extract atlas from: ' . $url, self::UNZIP_FAILED_CODE);
+            $errorMsg = 'We couldn\'t extract the zip downloaded from: ' . $importUrl . ".\r\n\r\n"
+                . "The error reported was:\r\n\r\n" . $process->getErrorOutput();
+            $this->sendErrorEmail($errorMsg, $atlas);
+            throw new \ErrorException('Could not extract atlas from: ' . $importUrl, self::UNZIP_FAILED_CODE);
         }
         $output->writeln('Unzip complete');
 
@@ -78,10 +100,11 @@ class AtlasImportCommand extends ContainerAwareCommand
         $output->writeln('Starting file parsing...');
         $finder = new Finder();
         $finder->files()->in($extractedDir)->name('*.jp2')->name('*.tif');
-        $count = 1;
+        $count = 0;
         $pageTitle = '';
         $pageMetadata = array();
         foreach($finder as $file) {
+            $count++;
             $metadataFile = $file->getBasename($file->getExtension()) . 'xml';
             if (file_exists($metadataFile)) {
                 $doc = new \DOMDocument();
@@ -100,25 +123,28 @@ class AtlasImportCommand extends ContainerAwareCommand
             $page->setFilename($file->getFilename());
             $page->setAtlas($atlas);
             $em->persist($page);
-            $count++;
         }
         $em->persist($atlas);
         $em->flush();
 
-        $output->writeln('Found and created ' . iterator_count($finder) . ' pages.');
+        $output->writeln('Found and created ' . $count . ' pages.');
 
-        if ($input->hasArgument('alert-email')) {
+        if ($input->hasOption('send-email')) {
             $mailer = $this->getContainer()->get('mailer');
+            $successMessage = 'We downloaded the atlas, extracted it, and created ' . $count . ' page';
+            $successMessage .= $count > 1 ? 's' : '';
+            $successMessage .= ".\r\n\r\nTo edit the atlas or start tile generation, visit: " 
+                . $this->getContainer()->get('router')->generate('atlas_edit', array( 'id' => $atlas->getId()), true);
             $message = \Swift_Message::newInstance()
-                ->setSubject('Atlas Viewer - Tile Generation Completed')
+                ->setSubject('Digital Atlas Viewer - Task Completed')
                 ->setFrom('jclark.symfony@gmail.com')
                 ->setTo($atlas->getOwner()->getEmail())
                 ->setBody(
                     $this->getContainer()->get('templating')->render(
-                        'BerkmanAtlasViewerBundle:Importer:successEmail.txt.twig',
+                        'BerkmanAtlasViewerBundle:Email:successEmail.txt.twig',
                         array(
                             'name' => $atlas->getOwner()->getUsername(),
-                            'atlas_id' => $atlas->getId()
+                            'message' => $successMessage
                         )
                     )
                 )
@@ -130,12 +156,12 @@ class AtlasImportCommand extends ContainerAwareCommand
     private function sendErrorEmail($errorMsg, $atlas) {
         $mailer = $this->getContainer()->get('mailer');
         $message = \Swift_Message::newInstance()
-            ->setSubject('Atlas Viewer - Tile Generation Failure')
+            ->setSubject('Digital Atlas Viewer - Atlas Import Failure')
             ->setFrom('jclark.symfony@gmail.com')
             ->setTo($atlas->getOwner()->getEmail())
             ->setBody(
                 $this->getContainer()->get('templating')->render(
-                    'BerkmanAtlasViewerBundle:Importer:errorEmail.txt.twig',
+                    'BerkmanAtlasViewerBundle:Email:errorEmail.txt.twig',
                     array(
                         'name' => $atlas->getOwner()->getUsername(),
                         'error' => $errorMsg

@@ -3,6 +3,7 @@
 namespace Berkman\AtlasViewerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Berkman\AtlasViewerBundle\Entity\Atlas
@@ -210,6 +211,15 @@ class Atlas
     public function getPages()
     {
         return $this->pages;
+    }
+
+    /**
+     * Set Pages
+     *
+     */
+    public function setPages(ArrayCollection $pages)
+    {
+        $this->pages = $pages;
     }
 
     /**

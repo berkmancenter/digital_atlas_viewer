@@ -6,10 +6,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
-use Symfony\Component\Process\Process;
 
 use Berkman\AtlasViewerBundle\Entity\Atlas;
-use Berkman\AtlasViewerBundle\Entity\TilingJob;
+use Berkman\AtlasViewerBundle\Entity\Job;
 use Berkman\AtlasViewerBundle\Form\AtlasType;
 
 /**
@@ -201,18 +200,33 @@ class AtlasController extends Controller
     }
 
     /**
-     * Recreates the tiles of the atlas
+     * Creates the tiles of the atlas
      *
      */
-    public function recreateTilesAction($overwriteOld = true)
+    public function generateTilesAction($id)
     {
-            $this->get('kernel')->getRootDir();
-        $command = $_SERVER['DOCUMENT_ROOT'] . '/DAV/app/console atlas_viewer:import ' . $entity->getId() . ' ' . $entity->getUrl() . ' ' . $entity->getDefaultEpsgCode() . ' ' . $_SERVER['DOCUMENT_ROOT'] . '/DAV/web/tiles/' . $entity->getId();
-        error_log($command);
-        $process = new Process($command);
-        $process->setTimeout(6 * 60 * 60);
-        $process->run();
+        $em = $this->getDoctrine()->getEntityManager();
+        $rootDir = $this->get('kernel')->getRootDir();
+        $command = 'nice ' . $rootDir . '/console atlas_viewer:atlas:generate_tiles ' . $id . ' ' . $rootDir . '/../tmp ' . $rootDir . '/../web/tiles -m';
+        $job = new Job($command, 6 * 60 * 60);
+        $em->persist($job);
+        $em->flush();
+        return $this->render('BerkmanAtlasViewerBundle:Atlas:pending.html.twig');
+    }
 
+    /**
+     * Import an atlas (download, extract, create pages)
+     *
+     */
+    public function importAction($id)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $rootDir = $this->get('kernel')->getRootDir();
+        $command = 'nice ' . $rootDir . '/console atlas_viewer:atlas:import ' . $id . ' ' . $rootDir . '/../tmp -m --overwrite';
+        $job = new Job($command, 2 * 60 * 60);
+        $em->persist($job);
+        $em->flush();
+        return $this->render('BerkmanAtlasViewerBundle:Atlas:pending.html.twig');
     }
 
     private function createDeleteForm($id)

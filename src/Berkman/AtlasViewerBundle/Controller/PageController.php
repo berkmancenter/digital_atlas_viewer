@@ -151,6 +151,17 @@ class PageController extends Controller
         ));
     }
 
+    public function generateTilesAction($id)
+    {
+        $em = $this->getDoctrine()->getEntityManager();
+        $rootDir = $this->get('kernel')->getRootDir();
+        $command = 'nice ' . $rootDir . '/console atlas_viewer:page:generate_tiles ' . $id . ' ' . $rootDir . '/../tmp ' . $rootDir . '/../web/tiles -m';
+        $job = new Job($command, 1 * 60 * 60);
+        $em->persist($job);
+        $em->flush();
+        return $this->render('BerkmanAtlasViewerBundle:Atlas:pending.html.twig');
+    }
+
     /**
      * Deletes a Page entity.
      *

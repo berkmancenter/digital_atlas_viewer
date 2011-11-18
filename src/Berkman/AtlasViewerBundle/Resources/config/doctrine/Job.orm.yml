@@ -10,6 +10,3 @@ Berkman\AtlasViewerBundle\Entity\Job:
       type: string
     timeout:
       type: integer
-    alert_email:
-      type: string
-      nullable: true

@@ -28,3 +28,11 @@ atlas_delete:
     pattern:  /{id}/delete
     defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:delete" }
     requirements: { _method: post }
+
+atlas_import:
+    pattern:  /{id}/import
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:import" }
+
+atlas_generate_tiles:
+    pattern:  /{id}/generateTiles
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Atlas:generateTiles" }
