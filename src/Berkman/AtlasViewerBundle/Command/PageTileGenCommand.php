@@ -111,7 +111,7 @@ class PageTileGenCommand extends ContainerAwareCommand
             $mailer = $this->getContainer()->get('mailer');
             $successMessage = 'The tiles were generated successfully.';
             $successMessage .= ".\r\n\r\nTo view the atlas, visit: " 
-                . $this->getContainer()->get('router')->generate('atlas_show', array( 'id' => $atlas->getId()), true);
+                . $this->getContainer()->get('router')->generate('atlas_show', array( 'id' => $page->getAtlas()->getId()), true);
             $message = \Swift_Message::newInstance()
                 ->setSubject('Digital Atlas Viewer - Task Completed')
                 ->setFrom('jclark.symfony@gmail.com')
