@@ -129,7 +129,7 @@ class AtlasImportCommand extends ContainerAwareCommand
 
         $output->writeln('Found and created ' . $count . ' pages.');
 
-        if ($input->hasOption('send-email')) {
+        if ($input->getOption('send-email')) {
             $mailer = $this->getContainer()->get('mailer');
             $successMessage = 'We downloaded the atlas, extracted it, and created ' . $count . ' page';
             $successMessage .= $count > 1 ? 's' : '';

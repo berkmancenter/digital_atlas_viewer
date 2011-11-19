@@ -17,6 +17,7 @@
     <script>
         var pages = [
         {% for page in entity.pages %}
+            {% if page.boundingBox is not empty %}
             {
                 id: "{{ page.id }}",
                 name: "{{ page.name }}",
@@ -25,6 +26,7 @@
                 minZoom: {{ page.minZoomLevel }},
                 maxZoom: {{ page.maxZoomLevel }}
             }, 
+            {% endif %}
         {% endfor %}
         ],
         atlasId = {{ entity.id }};

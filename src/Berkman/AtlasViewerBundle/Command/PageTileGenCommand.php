@@ -107,7 +107,7 @@ class PageTileGenCommand extends ContainerAwareCommand
         $em->flush();
         $output->writeln('Finished');
 
-        if ($input->hasOption('send-email')) {
+        if ($input->getOption('send-email')) {
             $mailer = $this->getContainer()->get('mailer');
             $successMessage = 'The tiles for this page were generated successfully.';
             $successMessage .= "\r\n\r\nTo view the atlas, visit: " 
