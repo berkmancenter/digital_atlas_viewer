@@ -14,6 +14,7 @@ class AtlasType extends AbstractType
             ->add('description')
             ->add('url')
             ->add('default_epsg_code')
+            ->add('pages', 'collection', array('type' => new PageType()))
         ;
     }
 

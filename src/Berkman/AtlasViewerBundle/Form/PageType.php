@@ -12,7 +12,6 @@ class PageType extends AbstractType
         $builder
             ->add('name')
             ->add('epsg_code')
-            ->add('metadata')
         ;
     }
 
