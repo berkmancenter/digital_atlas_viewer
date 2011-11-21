@@ -39,10 +39,12 @@ class PageTileGenCommand extends ContainerAwareCommand
         }
         $output->writeln('Found page.');
 
+        $atlas = $page->getAtlas();
+
         // Check and prepare the working directory
         $output->writeln('Setting up the working directory...');
-        $workingDir = $input->getArgument('working-dir') . '/' . $page->getAtlas()->getId();
-        $outputDir = $input->getArgument('output-dir') . '/' . $page->getAtlas()->getId() . '/' . $page->getId();
+        $workingDir = $input->getArgument('working-dir') . '/' . $atlas->getId();
+        $outputDir = $input->getArgument('output-dir') . '/' . $atlas->getId() . '/' . $page->getId();
         $mapFile = $workingDir . '/extracted/' . $page->getFilename();
         $tmpTileDir = $workingDir . '/tiles/' . $page->getId();
         if (!file_exists($workingDir)) {
@@ -75,7 +77,7 @@ class PageTileGenCommand extends ContainerAwareCommand
         else {
             $errorMsg = 'We couldn\'t make tiles from the file: ' . $page->getFilename() . ".\r\n\r\n"
                 . "The error reported was:\r\n\r\n" . $process->getErrorOutput();
-            $this->sendErrorEmail($errorMsg, $page->getAtlas());
+            $this->sendErrorEmail($errorMsg, $atlas);
             throw new \ErrorException('Could not make tiles for file: ' . $mapFile, self::TILE_GEN_FAILED_CODE);
         }
         $output->writeln('Tile generation complete.');
@@ -98,10 +100,40 @@ class PageTileGenCommand extends ContainerAwareCommand
             $zoomLevels[] = $tileSet->getAttribute('order');
         }
 
+        // Alter the atlas bounds and zoom levels based on this page
+        $atlasBounds = $atlas->getBounds();
+        foreach($bounds as $key => $bound) {
+            switch($key) {
+            case 'minx':
+            case 'miny':
+                if (empty($atlasBounds[$key]) || $bound < $atlasBounds[$key]) {
+                    $atlasBounds[$key] = $bound;
+                }
+                break;
+            case 'maxx':
+            case 'maxy':
+                if (empty($atlasBounds[$key]) || $bound > $atlasBounds[$key]) {
+                    $atlasBounds[$key] = $bound;
+                }
+                break;
+            }
+        }
+        $atlas->setBounds($atlasBounds);
+        $minZoom = $atlas->getMinZoomLevel();
+        if (min($zoomLevels) < $minZoom || empty($minZoom)) {
+            $atlas->setMinZoomLevel(min($zoomLevels));
+        }
+        $maxZoom = $atlas->getMaxZoomLevel();
+        if (max($zoomLevels) > $maxZoom || empty($maxZoom)) {
+            $atlas->setMaxZoomLevel(max($zoomLevels));
+        }
+        $em->persist($atlas);
+
         // Create the new page
-        $page->setBoundingBox($bounds);
+        $page->setBounds($bounds);
         $page->setMinZoomLevel(min($zoomLevels));
         $page->setMaxZoomLevel(max($zoomLevels));
+        $page->setTilesExist(true);
         $output->writeln('Bounds and zoom levels acquired.');
         $em->persist($page);
         $em->flush();
@@ -111,16 +143,16 @@ class PageTileGenCommand extends ContainerAwareCommand
             $mailer = $this->getContainer()->get('mailer');
             $successMessage = 'The tiles for this page were generated successfully.';
             $successMessage .= "\r\n\r\nTo view the atlas, visit: " 
-                . $this->getContainer()->get('router')->generate('atlas_show', array( 'id' => $page->getAtlas()->getId()), true);
+                . $this->getContainer()->get('router')->generate('atlas_show', array( 'id' => $atlas->getId()), true);
             $message = \Swift_Message::newInstance()
                 ->setSubject('Digital Atlas Viewer - Task Completed')
                 ->setFrom('jclark.symfony@gmail.com')
-                ->setTo($page->getAtlas()->getOwner()->getEmail())
+                ->setTo($atlas->getOwner()->getEmail())
                 ->setBody(
                     $this->getContainer()->get('templating')->render(
                         'BerkmanAtlasViewerBundle:Email:successEmail.txt.twig',
                         array(
-                            'name' => $page->getAtlas()->getOwner()->getUsername(),
+                            'name' => $atlas->getOwner()->getUsername(),
                             'message' => $successMessage
                         )
                     )

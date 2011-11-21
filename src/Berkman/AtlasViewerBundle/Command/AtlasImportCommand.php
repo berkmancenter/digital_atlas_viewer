@@ -52,8 +52,6 @@ class AtlasImportCommand extends ContainerAwareCommand
             }
             $atlas->setPages(new ArrayCollection());
             $em->flush();
-            // Remove tiles
-            //$this->emptyDir(
         }
 
 
@@ -105,9 +103,11 @@ class AtlasImportCommand extends ContainerAwareCommand
         $pageMetadata = array();
         foreach($finder as $file) {
             $count++;
-            $metadataFile = $file->getBasename($file->getExtension()) . 'xml';
+            $metadataFile = $file->getPath() . '/' . $file->getBasename($file->getExtension()) . 'xml';
+            $output->writeln('Metadata Filename: ' . $metadataFile);
             if (file_exists($metadataFile)) {
                 $doc = new \DOMDocument();
+                $doc->recover = true;
                 $doc->load($metadataFile);
                 $xpath = new \DOMXpath($doc);
                 $pageTitle = $xpath->query('//citeinfo/title')->item(0)->textContent;
