@@ -13,6 +13,7 @@ class PageType extends AbstractType
             ->add('name')
             ->add('epsg_code')
             ->add('id', 'hidden')
+            ->add('tiles_exist', 'hidden')
         ;
     }
 
