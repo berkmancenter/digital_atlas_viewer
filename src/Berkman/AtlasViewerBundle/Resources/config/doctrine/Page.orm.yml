@@ -12,10 +12,12 @@ Berkman\AtlasViewerBundle\Entity\Page:
       type: integer
     metadata:
       type: array
+    tiles_exist:
+      type: boolean
     filename:
       type: string
       nullable: true
-    bounding_box:
+    bounds:
       type: array
       nullable: true
     min_zoom_level:

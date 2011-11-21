@@ -55,6 +55,22 @@ class Atlas
      */
     private $owner;
 
+    /**
+     * @var array $bounds
+     */
+    private $bounds;
+
+    /**
+     * @var integer $min_zoom_level
+     */
+    private $min_zoom_level;
+
+    /**
+     * @var integer $max_zoom_level
+     */
+    private $max_zoom_level;
+
+
     public function __construct($importUrl = null, $workingDir = null, $outputDir = null)
     {
         $this->pages = new \Doctrine\Common\Collections\ArrayCollection();
@@ -242,7 +258,63 @@ class Atlas
         return $this->owner;
     }
 
-    public function import($importUrl, $workingDir, $outputDir)
+    /**
+     * Set bounds
+     *
+     * @param array $bounds
+     */
+    public function setBounds($bounds)
     {
+        $this->bounds = $bounds;
+    }
+
+    /**
+     * Get bounds
+     *
+     * @return array 
+     */
+    public function getBounds()
+    {
+        return $this->bounds;
+    }
+
+    /**
+     * Set min_zoom_level
+     *
+     * @param integer $minZoomLevel
+     */
+    public function setMinZoomLevel($minZoomLevel)
+    {
+        $this->min_zoom_level = $minZoomLevel;
+    }
+
+    /**
+     * Get min_zoom_level
+     *
+     * @return integer 
+     */
+    public function getMinZoomLevel()
+    {
+        return $this->min_zoom_level;
+    }
+
+    /**
+     * Set max_zoom_level
+     *
+     * @param integer $maxZoomLevel
+     */
+    public function setMaxZoomLevel($maxZoomLevel)
+    {
+        $this->max_zoom_level = $maxZoomLevel;
+    }
+
+    /**
+     * Get max_zoom_level
+     *
+     * @return integer 
+     */
+    public function getMaxZoomLevel()
+    {
+        return $this->max_zoom_level;
     }
 }

@@ -54,6 +54,12 @@ class Page
      *
      * @return integer 
      */
+
+    public function __construct()
+    {
+        $this->setTilesExist(false);
+    }
+    
     public function getId()
     {
         return $this->id;
@@ -252,4 +258,79 @@ class Page
             }
         } 
     } 
+    /**
+     * @var string $tile_dir
+     */
+    private $tile_dir;
+
+
+    /**
+     * Set tile_dir
+     *
+     * @param string $tileDir
+     */
+    public function setTileDir($tileDir)
+    {
+        $this->tile_dir = $tileDir;
+    }
+
+    /**
+     * Get tile_dir
+     *
+     * @return string 
+     */
+    public function getTileDir()
+    {
+        return $this->tile_dir;
+    }
+    /**
+     * @var boolean $tiles_exist
+     */
+    private $tiles_exist;
+
+
+    /**
+     * Set tiles_exist
+     *
+     * @param boolean $tilesExist
+     */
+    public function setTilesExist($tilesExist)
+    {
+        $this->tiles_exist = $tilesExist;
+    }
+
+    /**
+     * Get tiles_exist
+     *
+     * @return boolean 
+     */
+    public function getTilesExist()
+    {
+        return $this->tiles_exist;
+    }
+    /**
+     * @var array $bounds
+     */
+    private $bounds;
+
+
+    /**
+     * Set bounds
+     *
+     * @param array $bounds
+     */
+    public function setBounds($bounds)
+    {
+        $this->bounds = $bounds;
+    }
+
+    /**
+     * Get bounds
+     *
+     * @return array 
+     */
+    public function getBounds()
+    {
+        return $this->bounds;
+    }
 }

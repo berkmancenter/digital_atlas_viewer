@@ -19,6 +19,15 @@ Berkman\AtlasViewerBundle\Entity\Atlas:
       type: datetime
     updated:
       type: datetime
+    bounds:
+      type: array
+      nullable: true
+    min_zoom_level:
+      type: integer
+      nullable: true
+    max_zoom_level:
+      type: integer
+      nullable: true
   oneToMany:
     pages:
       targetEntity: Page
