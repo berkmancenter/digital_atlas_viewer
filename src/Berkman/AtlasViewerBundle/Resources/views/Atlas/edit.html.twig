@@ -12,6 +12,14 @@
     </p>
 </form>
 
+<a href="{{ path( 'atlas_import', { 'id': entity.id }) }}">Import Atlas</a>
+{% if entity.pages|length > 0 %}
+    {% if tiles_exist %}
+        <a href="{{ path( 'atlas_generate_tiles', { 'id': entity.id }) }}">Regenerate Tiles</a>
+    {% else %}
+        <a href="{{ path( 'atlas_generate_tiles', { 'id': entity.id }) }}">Generate Tiles</a>
+    {% endif %}
+{% endif %}
 <ul class="record_actions">
     <li>
         <a href="{{ path('atlas') }}">
