@@ -104,8 +104,7 @@ class AtlasController extends Controller
             $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
             $aclProvider->updateAcl($acl);
 
-
-            return $this->render('BerkmanAtlasViewerBundle:Atlas:pending.html.twig', array('email' => $user->getEmail()));
+            return $this->redirect($this->generateUrl('atlas'));
         }
 
         return $this->render('BerkmanAtlasViewerBundle:Atlas:new.html.twig', array(
@@ -135,6 +134,7 @@ class AtlasController extends Controller
             'entity'      => $entity,
             'edit_form'   => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
+            'tiles_exist' => file_exists($this->getTilesDir() . '/' . $entity->getId())
         ));
     }
 
@@ -207,7 +207,7 @@ class AtlasController extends Controller
     {
         $em = $this->getDoctrine()->getEntityManager();
         $rootDir = $this->get('kernel')->getRootDir();
-        $command = 'nice ' . $rootDir . '/console atlas_viewer:atlas:generate_tiles ' . $id . ' ' . $rootDir . '/../tmp ' . $rootDir . '/../web/tiles -m';
+        $command = 'nice ' . $rootDir . '/console atlas_viewer:atlas:generate_tiles ' . $id . ' ' . $this->getWorkingDir() . ' ' . $this->getTilesDir() . ' -m';
         $job = new Job($command, 6 * 60 * 60);
         $em->persist($job);
         $em->flush();
@@ -222,7 +222,7 @@ class AtlasController extends Controller
     {
         $em = $this->getDoctrine()->getEntityManager();
         $rootDir = $this->get('kernel')->getRootDir();
-        $command = 'nice ' . $rootDir . '/console atlas_viewer:atlas:import ' . $id . ' ' . $rootDir . '/../tmp -m --overwrite';
+        $command = 'nice ' . $rootDir . '/console atlas_viewer:atlas:import ' . $id . ' ' . $this->getWorkingDir() . ' -m --overwrite';
         $job = new Job($command, 2 * 60 * 60);
         $em->persist($job);
         $em->flush();
@@ -235,5 +235,16 @@ class AtlasController extends Controller
             ->add('id', 'hidden')
             ->getForm()
         ;
+    }
+
+    private function getWorkingDir()
+    {
+        return $this->get('kernel')->getRootDir() . '/../tmp';
+
+    }
+
+    private function getTilesDir()
+    {
+        return $this->get('kernel')->getRootDir() . '/../web/tiles';
     }
 }
