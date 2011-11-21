@@ -28,3 +28,7 @@ page_delete:
     pattern:  /{id}/delete
     defaults: { _controller: "BerkmanAtlasViewerBundle:Page:delete" }
     requirements: { _method: post }
+
+page_generate_tiles:
+    pattern:  /{id}/generateTiles
+    defaults: { _controller: "BerkmanAtlasViewerBundle:Page:generateTiles" }
