@@ -17,19 +17,22 @@
     <script>
         var pages = [
         {% for page in entity.pages %}
-            {% if page.boundingBox is not empty %}
+            {% if page.bounds is not empty %}
             {
                 id: "{{ page.id }}",
                 name: "{{ page.name }}",
                 metadata: {{ page.metadata|json_encode|raw }},
-                bounds: {{ page.boundingBox|json_encode|raw }},
+                bounds: {{ page.bounds|json_encode|raw }},
                 minZoom: {{ page.minZoomLevel }},
                 maxZoom: {{ page.maxZoomLevel }}
             }, 
             {% endif %}
         {% endfor %}
         ],
-        atlasId = {{ entity.id }};
+        atlasId = {{ entity.id }},
+        atlasBounds = {{ entity.bounds|json_encode|raw }},
+        minZoom = {{ entity.minZoomLevel }},
+        maxZoom = {{ entity.maxZoomLevel }};
     </script>
     {% javascripts 
                    '@BerkmanAtlasViewerBundle/Resources/public/js/atlas_show.js'

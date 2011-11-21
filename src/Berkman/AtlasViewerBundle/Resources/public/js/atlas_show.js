@@ -4,13 +4,10 @@ $(function() {
         return $(this[0]).closest('.layer-wrap');
     };
 
-    var atlasBounds = { minx: null, miny: null, maxx: null, maxy: null }, minZoom = null, maxZoom = null;
-
     // avoid pink tiles
     OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
     OpenLayers.Util.onImageLoadErrorColor = "transparent";
     OpenLayers.ImgPath = "http://js.mapbox.com/theme/dark/";
-
 
     var options = {
         controls: [],
@@ -19,36 +16,18 @@ $(function() {
         units: "m",
         maxResolution: 156543.0339,
         maxExtent: new OpenLayers.Bounds(-20037508.3427892,-20037508.3427892,20037508.3427892,20037508.3427892), 
+        numZoomLevels: maxZoom
     };
 
     map = new OpenLayers.Map('map', options);
 
     // create Google Mercator layers
-    var gmap = new OpenLayers.Layer.Google("Google Streets", { sphericalMercator: true, numZoomLevels: 21} );
-    var ghyb = new OpenLayers.Layer.Google("Google Hybrid", {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 21});
+    var gmap = new OpenLayers.Layer.Google("Google Streets", { sphericalMercator: true} );
+    var ghyb = new OpenLayers.Layer.Google("Google Hybrid", {type: google.maps.MapTypeId.HYBRID});
 
     var layers = [gmap, ghyb];
     var layer;
     for ( i in pages ) {
-        if ( pages[i].bounds.minx < atlasBounds.minx || atlasBounds.minx === null ) {
-            atlasBounds.minx = pages[i].bounds.minx;
-        }
-        if ( pages[i].bounds.miny < atlasBounds.miny || atlasBounds.miny === null ) {
-            atlasBounds.miny = pages[i].bounds.miny;
-        }
-        if ( pages[i].bounds.maxx > atlasBounds.maxx || atlasBounds.maxx === null ) {
-            atlasBounds.maxx = pages[i].bounds.maxx;
-        }
-        if ( pages[i].bounds.maxy < atlasBounds.maxy || atlasBounds.maxy === null ) {
-            atlasBounds.maxy = pages[i].bounds.maxy;
-        }
-        if ( pages[i].minZoom < minZoom || minZoom === null ) {
-            minZoom = pages[i].minZoom;
-        }
-        if ( pages[i].maxZoom > maxZoom || maxZoom === null ) {
-            maxZoom = pages[i].maxZoom;
-        }
-
         pages[i].oBounds = new OpenLayers.Bounds(
             pages[i].bounds.miny,
             pages[i].bounds.minx,
@@ -262,10 +241,10 @@ $(function() {
                 $(this.div).find('.layersDiv').prepend(
                     '<div class="atlasLbl">Atlas</div>' + 
                     '<div class="atlasButtonsDiv">' + 
-                        '<a href="#" title="Zoom to entire atlas" class="atlas-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
-                        '<a href="#" title="Zoom to visible pages" class="multi-layer-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
-                        '<a href="#" title="Hide all pages" class="multi-layer-hide"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/></a>' +
-                        '<a href="#" title="Show all pages" class="multi-layer-show"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/></a>' +
+                        '<a href="#" title="Zoom to entire atlas" class="atlas-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/>Zoom to atlas</a><br />' +
+                        '<a href="#" title="Zoom to visible pages" class="multi-layer-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/>Zoom to visible pages</a><br />' +
+                        '<a href="#" title="Hide all pages" class="multi-layer-hide"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/>Hide all pages</a><br />' +
+                        '<a href="#" title="Show all pages" class="multi-layer-show"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/>Show all pages</a>' +
                         '<div class="atlas-opacity-slider"/>' +
                     '</div>'
                 );
