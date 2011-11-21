@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 use Berkman\AtlasViewerBundle\Entity\Page;
 use Berkman\AtlasViewerBundle\Form\PageType;
+use Berkman\AtlasViewerBundle\Entity\Job;
 
 /**
  * Page controller.
