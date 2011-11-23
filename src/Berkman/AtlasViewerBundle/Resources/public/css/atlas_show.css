@@ -115,7 +115,7 @@ a.atlas-control {
     width: 12px;
     height: 100%;
     margin-right: 4px;
-    cursor: auto;
+    cursor: pointer;
 }
 .expanded-layer {
     background: url(/DAV/web/bundles/berkmanatlasviewer/images/arrow_up_8x8.png);
@@ -159,4 +159,31 @@ a.atlas-control {
     vertical-align: middle;
     text-align: center;
     background-color: #000;
+}
+.labelSpan {
+    vertical-align: top;
+    display: inline-block;
+    max-width: 82%;
+    font-size: 11px;
+    font-weight: normal;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.layer-controls {
+    text-align: center;
+}
+.ui-icon-closethick, #metadata-close {
+    background-image: url(/DAV/web/bundles/berkmanatlasviewer/images/x_7x7.png) !important;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.ui-dialog-titlebar-close {
+    background: black;
+}
+.ui-dialog-title {
+    font-size: 13px;
+}
+#page-metadata {
+    font-size: 12px;
 }

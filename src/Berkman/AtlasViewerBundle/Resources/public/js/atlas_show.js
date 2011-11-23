@@ -9,7 +9,7 @@ $(function() {
     // Try to avoid pink tiles
     OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
     OpenLayers.Util.onImageLoadErrorColor = "transparent";
-    OpenLayers.ImgPath = "http://js.mapbox.com/theme/dark/";
+    OpenLayers.ImgPath = "/DAV/web/bundles/berkmanatlasviewer/images/openlayers/";
 
     // Create our variables
     var options = {
@@ -93,8 +93,8 @@ $(function() {
     map.addControl(switcherControl);
     switcherControl.maximizeControl();
 
-    // Hide the metadata and page-specific controls by default
-    $('#metadata, .layer-inside-wrap').hide();
+    // Hide the page-specific controls by default
+    $('#metadata-toggle, .layer-inside-wrap').hide();
 
     // Add all the other controls
     map.addControl(new OpenLayers.Control.PanZoomBar());
@@ -121,7 +121,15 @@ $(function() {
     });
 
     $('#metadata-close').click(function() {
-        $('#metadata').slideToggle('fast', function() { $('#metadata-toggle').slideToggle('fast'); });
+        $('#metadata').slideToggle('fast');
+        $('#metadata-toggle').slideToggle('fast');
+    });
+
+    $('#page-metadata').dialog({
+        autoOpen: false,
+        modal: true,
+        dialogClass: 'metadata-modal',
+        zIndex: 1200
     });
 
     /* ---- Atlas-level handlers ---- */
@@ -227,6 +235,25 @@ $(function() {
         $(this).getLayer().find('.layer-expand-control').toggleClass('expanded-layer');
     });
 
+    $('.layer-opacity-slider').slider({
+        slide: function(e, ui) {
+            var layerId  = $(ui.handle).getLayer().data('layerId');
+            map.getLayer(layerId).setOpacity(ui.value / 100);
+        },
+        change: function(e, ui) {
+            var layerId  = $(ui.handle).getLayer().data('layerId');
+            map.getLayer(layerId).setOpacity(ui.value / 100);
+        },
+        start: function() {
+            bBoxFrozen = true;
+        },
+        stop: function() {
+            bBoxFrozen = false;
+        },
+        value: 100,
+        step: 5
+    });
+
     $('.layer-zoom').click(function(e) {
         var i, bounds, layerId = $(this).getLayer().data('layerId');
         for (i in pages) {
@@ -244,17 +271,20 @@ $(function() {
         map.setLayerIndex(map.getLayer(layerId), pages.length + 1);
     });
 
-    $('.layer-opacity-slider').slider({
-        slide: function(e, ui) {
-            var layerId  = $(ui.handle).getLayer().data('layerId');
-            map.getLayer(layerId).setOpacity(ui.value / 100);
-        },
-        change: function(e, ui) {
-            var layerId  = $(ui.handle).getLayer().data('layerId');
-            map.getLayer(layerId).setOpacity(ui.value / 100);
-        },
-        value: 100,
-        step: 5
+    $('.layer-metadata').click(function(e) {
+        var layerId = $(this).getLayer().data('layerId');
+        for (i in pages) {
+            if (pages[i].layerId == layerId) {
+                $('#page-metadata').html(function() {
+                    var html = '<dl>';
+                    for (term in pages[i].metadata) {
+                        html += '<dt>' + term + '</dt><dd>' + pages[i].metadata[term] + '</dd>';
+                    }
+                    html += '</dl>';
+                    return html;
+                }).dialog('option', {title: pages[i].name}).dialog('open');
+            }
+        }
     });
 });
 

@@ -92,8 +92,7 @@ OpenLayers.Control.CustomLayerSwitcher =
                         labelSpan.style.color = "gray";
                     }
                     labelSpan.innerHTML = layer.name;
-                    labelSpan.style.verticalAlign = (baseLayer) ? "bottom" 
-                                                                : "baseline";
+
                     OpenLayers.Event.observe(labelSpan, "click", 
                         OpenLayers.Function.bindAsEventListener(this.onInputClick,
                                                                 context)
@@ -131,9 +130,20 @@ OpenLayers.Control.CustomLayerSwitcher =
                             )
                             .append(
                                 $('<div class="layer-inside-wrap" />')
-                                .html('Opacity:<div class="layer-opacity-slider"/>')
-                                .append('<a class="layer-zoom atlas-control" href="#" title="Zoom to Page"><img src="/DAV/web/bundles/berkmanatlasviewer/images/fullscreen_12x12.png" alt="Zoom to Page"/></a>')
-                                .append('<a class="layer-raise atlas-control" href="#" title="Put layer on top"><img src="/DAV/web/bundles/berkmanatlasviewer/images/upload_6x12.png" alt="Put layer on top"/></a>')
+                                .html(
+                                    'Opacity:<div class="layer-opacity-slider"/>'
+                                    + '<div class="layer-controls">'
+                                    + '<a class="layer-zoom atlas-control" href="#" title="Zoom to page">'
+                                    + '<img src="/DAV/web/bundles/berkmanatlasviewer/images/fullscreen_12x12.png" alt="Zoom to Page"/>'
+                                    + '</a>'
+                                    + '<a class="layer-raise atlas-control" href="#" title="Put layer on top">'
+                                    + '<img src="/DAV/web/bundles/berkmanatlasviewer/images/upload_6x12.png" alt="Put layer on top"/>'
+                                    + '</a>'
+                                    + '<a class="layer-metadata atlas-control" href="#" title="Show page metadata">'
+                                    + '<img src="/DAV/web/bundles/berkmanatlasviewer/images/list_12x11.png" alt="Show page metadata"/>'
+                                    + '</a>'
+                                    + '</div>'
+                                )
                             )
                         );
                     }
@@ -156,8 +166,8 @@ OpenLayers.Control.CustomLayerSwitcher =
                     '<div class="atlas-opacity-slider"/>' +
                     '<a href="#" title="Zoom to entire atlas" class="atlas-zoom atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/fullscreen_12x12.png"/></a>' +
                     '<a href="#" title="Zoom to visible pages" class="multi-layer-zoom atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
-                    '<a href="#" title="Hide all pages" class="multi-layer-hide atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/></a>' +
-                    '<a href="#" title="Show all pages" class="multi-layer-show atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/></a>' +
+                    '<a href="#" title="Show all pages" class="multi-layer-show atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/plus_alt_12x12.png"/></a>' +
+                    '<a href="#" title="Hide all pages" class="multi-layer-hide atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/minus_alt_12x12.png"/></a>' +
                 '</div>'
             );
             $(this.dataLbl).html('Pages');
