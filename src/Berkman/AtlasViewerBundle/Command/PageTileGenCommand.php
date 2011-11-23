@@ -70,7 +70,7 @@ class PageTileGenCommand extends ContainerAwareCommand
         $output->writeln('Generating tiles...');
         $command = 'gdal2tiles.py -n -w none -s ' . escapeshellarg('EPSG:' . $page->getEpsgCode()) . ' ' . escapeshellarg($mapFile) . ' ';
         if ($input->getOption('resume')) {
-            $command .= escapeshellarg($outputDir) . ' -e'; 
+            $command .= escapeshellarg($outputDir);// . ' -e'; 
         }
         else {
             $command .= escapeshellarg($tmpTileDir);
@@ -146,7 +146,9 @@ class PageTileGenCommand extends ContainerAwareCommand
         // Create the new page
         $page->setBounds($bounds);
         $page->setMinZoomLevel(min($zoomLevels));
-        $page->setMaxZoomLevel(max($zoomLevels));
+        if (!$input->getOption('zoom-levels')) {
+            $page->setMaxZoomLevel(max($zoomLevels));
+        }
         $page->setTilesExist(true);
         $output->writeln('Bounds and zoom levels acquired.');
         $em->persist($page);
