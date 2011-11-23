@@ -97,21 +97,43 @@ class AtlasImportCommand extends ContainerAwareCommand
         // Find and count the actual map files from the zip
         $output->writeln('Starting file parsing...');
         $finder = new Finder();
+        $metadataFinder = new Finder();
         $finder->files()->in($extractedDir)->name('*.jp2')->name('*.tif');
+        $metadataFinder->files()->in($extractedDir)->name('*.xml');
         $count = 0;
         $pageTitle = '';
         $pageMetadata = array();
         foreach($finder as $file) {
             $count++;
+            /*foreach ($metadataFinder as $possibleMetadataFile) {
+                $distance = levenshtein($possibleMetadataFile->getBasename($possibleMetadataFile->getExtension()), $file->getBasename($file->getExtension())) < 5;
+                $output->writeln('Distance: ' . $distance);
+                if ($distance) {
+                    $metadataFile = $possibleMetadataFile->getRealPath();
+                }
+            }*/
             $metadataFile = $file->getPath() . '/' . $file->getBasename($file->getExtension()) . 'xml';
-            $output->writeln('Metadata Filename: ' . $metadataFile);
             if (file_exists($metadataFile)) {
                 $doc = new \DOMDocument();
                 $doc->recover = true;
                 $doc->load($metadataFile);
                 $xpath = new \DOMXpath($doc);
                 $pageTitle = $xpath->query('//citeinfo/title')->item(0)->textContent;
-                $pageMetadata = array('More Metadata' => 'foobar');
+                $pubDate = $xpath->query('//citeinfo/pubdate')->item(0)->textContent;
+                $recordUrl = $xpath->query('//citeinfo/onlink')->item(0)->textContent;
+                $placeSystem = $xpath->query('//placekt')->item(0)->textContent;
+                $places = $xpath->query('//placekey');
+                $placeNames = array();
+                foreach ($places as $place) {
+                    $placeNames[] = $place->textContent;
+                }
+                $pageMetadata = array(
+                    'Title' => $pageTitle,
+                    'Publication Date' => $pubDate,
+                    'Record URL' => '<a href="' . $recordUrl . '">' . $recordUrl . '</a>',
+                    'Place Naming System' => $placeSystem,
+                    'Places' => implode(' - ', $placeNames)
+                );
             }
             else {
                 $pageTitle = $count;
