@@ -35,6 +35,8 @@
         maxZoom = {{ entity.maxZoomLevel }};
     </script>
     {% javascripts 
+                   '@BerkmanAtlasViewerBundle/Resources/public/js/ol_custom_click_handler.js'
+                   '@BerkmanAtlasViewerBundle/Resources/public/js/ol_custom_layer_switcher.js'
                    '@BerkmanAtlasViewerBundle/Resources/public/js/atlas_show.js'
                    '@BerkmanAtlasViewerBundle/Resources/public/js/jquery-mousewheel.min.js'
                    '@BerkmanAtlasViewerBundle/Resources/public/js/jquery-ui-1.8.16.custom.min.js' %}
@@ -43,7 +45,7 @@
 {% endblock javascripts %}
 
 {% block body %}
-<div id="map"></div>
+<div id="map"><div id="metadata-toggle">Atlas Info<div class="atlas-metadata-control"></div></div></div>
 <div id="metadata">
     <dl>
         <dt>Name</dt>
