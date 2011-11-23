@@ -38,11 +38,12 @@ class AtlasTileGenCommand extends ContainerAwareCommand
 
         $pages = $atlas->getPages();
         $numPages = count($pages);
-        $output->writeln('Generating tiles for ' . $numPages . ' pages...');
+        $output->writeln(array('Generating tiles for ' . $numPages . ' pages...', ''));
 
         $i = 0;
         foreach ($pages as $page) {
             $i++;
+            $output->writeln('Starting page ' . $i . '/' . $numPages . ' (Name: ' . $page->getName() . ')...');
             $command = $this->getApplication()->find('atlas_viewer:page:generate_tiles');
 
             $arguments = array(
@@ -54,29 +55,31 @@ class AtlasTileGenCommand extends ContainerAwareCommand
 
             $input = new ArrayInput($arguments);
             $command->run($input, $output);
-            $output->writeln('Finished page ' . $i . '/' . $numPages);
+            $output->writeln(array('<comment>Finished page ' . $i . '/' . $numPages . '</comment>', ''));
         }
 
-        $output->writeln('Generating tiles to normalize zoom levels across atlas...');
+        $output->writeln(array('Generating tiles to normalize zoom levels across atlas...', ''));
         $i = 0;
         foreach ($pages as $page) {
             $i++;
-            if ($page->getMinZoomLevel() - $atlas->getMinZoomLevel() > 0) {
+            if ($page->getMinZoomLevel() > $atlas->getMinZoomLevel()) {
                 $command = $this->getApplication()->find('atlas_viewer:page:generate_tiles');
-                $newZoomLevels = $atlas->getMinZoomLevel() . ' - ' . $page->getMinZoomLevel();
+                $newZoomLevels = $atlas->getMinZoomLevel() . '-' . $page->getMinZoomLevel();
+                $output->writeln('Creating new zoom levels ' . $newZoomLevels . ' for ' . $i . '/' . $numPages . ' (Name: ' . $page->getName() . ')...');
 
                 $arguments = array(
                     'command' => 'atlas_viewer:page:generate_tiles',
                     'page-id' => $page->getId(),
                     'working-dir' => $input->getArgument('working-dir'),
                     'output-dir'  => $input->getArgument('output-dir'),
-                    '-z' => $newZoomLevels
+                    '-z' => $newZoomLevels,
+                    '-r' => true
                 );
 
                 $input = new ArrayInput($arguments);
                 $command->run($input, $output);
             }
-            $output->writeln('<comment>Finished page ' . $i . '/' . $numPages.'</comment>');
+            $output->writeln(array('<comment>Finished page ' . $i . '/' . $numPages.'</comment>', ''));
         }
         $output->writeln('<info>Finished</info>');
 
