@@ -46,7 +46,7 @@ class RunJobCommand extends ContainerAwareCommand
                     if ('err' === $type) {
                         $output->writeln('ERR > '.$buffer);
                     } else {
-                        $output->writeln('OUT > '.$buffer);
+                        $output->write($buffer);
                     }
                 });
                 if ($process->isSuccessful()) {

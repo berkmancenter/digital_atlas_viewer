@@ -1,8 +1,17 @@
+dt {
+    font-weight: 700;
+}
 .layer-handle {
     width: 100%;
-    background-color: #666;
+    background-color: #555;
     border-radius: 2px;
     cursor: move;
+    height: 19px;
+    line-height: 19px;
+    vertical-align: middle;
+}
+.layer-handle:hover {
+    background-color: #666;
 }
 .layer-wrap {
     border: 1px solid #888;
@@ -14,6 +23,8 @@
 }
 .layer-inside-wrap {
     padding: 10px;
+    font-weight: normal;
+    font-size: 0.8em;
 }
 .dataLayersDiv, .atlasButtonsDiv {
     padding-right: 5px;
@@ -27,19 +38,37 @@ html, body, #map {
     font-family: Arial, sans-serif;
     overflow: hidden;
 }
-#map {
-    height: 90%;
+a.atlas-control {
+    color: white;
+    font-weight: normal;
+    font-size: 0.7em;
+    border: 1px solid #888;
+    padding: 4px;
+    border-radius: 2px;
+    background: #555;
+    line-height: 15px;
+    height: 15px;
+    width: 15px;
+    text-align: center;
+    display: inline-block;
+    margin: 0 4px;
+}
+.atlas-control img {
+    vertical-align: middle;
 }
 #metadata {
     width: 100%;
-    height: 10%;
     margin: 0;
     padding: 0;
     overflow: hidden;
     padding: 10px;
+    position: absolute;
+    bottom: 0;
+    z-index: 1101;
 }
-#metadata, .olPopup {
+#metadata, #metadata-toggle, .olPopup {
     background-color: #333 !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
     color: white;
     font-size: 0.8em;
 }
@@ -57,14 +86,77 @@ html, body, #map {
 .dataLayersDiv {
     max-height: 500px;
     overflow-y: auto;
+    border: 1px dotted #666;
+    border-width: 1px 0;
 }
 .layersDiv {
     opacity: 1.0 !important;
     background-color: rgba(0, 0, 0, 0.75) !important;
+}
+.layer-opacity-slider {
+    margin: 10px;
+}
+.atlas-opacity-slider {
+    margin: 15px;
 }
 .atlasLbl {
     margin: 3px 0 3px 3px;
 }
 .atlasButtonsDiv {
     padding-left: 10px;
+    text-align: center;
+}
+.layer-expand-control {
+    float: right;
+    vertical-align: middle;
+    background: url(/DAV/web/bundles/berkmanatlasviewer/images/arrow_down_8x8.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 12px;
+    height: 100%;
+    margin-right: 4px;
+    cursor: auto;
+}
+.expanded-layer {
+    background: url(/DAV/web/bundles/berkmanatlasviewer/images/arrow_up_8x8.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+#metadata-toggle {
+    background: #3d3c3c;
+    color: white;
+    padding: 4px 10px;
+    height: 1.2em;
+    position: absolute;
+    bottom: 0;
+    left: 48%;
+    font-size: 0.8em;
+    font-weight: 700;
+    border-radius: 4px 4px 0 0;
+    z-index: 1001;
+    cursor: pointer;
+}
+.atlas-metadata-control {
+    background: url(/DAV/web/bundles/berkmanatlasviewer/images/arrow_up_8x8.png);
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: right;
+    height: 1.2em;
+    width: 8px;
+    margin-left: 10px;
+}
+#metadata-close {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    width: 18px;
+    height: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 13px;
+    vertical-align: middle;
+    text-align: center;
+    background-color: #000;
 }

@@ -24,6 +24,8 @@ class PageTileGenCommand extends ContainerAwareCommand
             ->addArgument('working-dir', InputArgument::REQUIRED, 'The directory in which to work')
             ->addArgument('output-dir', InputArgument::REQUIRED, 'The web-accessible directory')
             ->addOption('send-email', 'm', InputOption::VALUE_NONE, 'Whether or not to send an email to the atlas owner when the process completes')
+            ->addOption('zoom-levels', 'z', InputOption::VALUE_REQUIRED, 'The zoom levels to create for this page')
+            ->addOption('resume', 'r', InputOption::VALUE_NONE, 'Generate only missing tiles')
         ;
     }
 
@@ -59,20 +61,32 @@ class PageTileGenCommand extends ContainerAwareCommand
         if (!file_exists($outputDir)) {
             mkdir($outputDir, 0777, true);
         }
-        else {
+        elseif (!$input->getOption('resume')) {
             $this->emptyDir($outputDir);
         } 
         $output->writeln('Working directory set up.');
 
         // Run the script to generate tiles
         $output->writeln('Generating tiles...');
-        $command = 'gdal2tiles.py -n -w none -s ' . escapeshellarg('EPSG:' . $page->getEpsgCode()) . ' ' . escapeshellarg($mapFile) . ' ' . escapeshellarg($tmpTileDir);
+        $command = 'gdal2tiles.py -n -w none -s ' . escapeshellarg('EPSG:' . $page->getEpsgCode()) . ' ' . escapeshellarg($mapFile) . ' ';
+        if ($input->getOption('resume')) {
+            $command .= escapeshellarg($outputDir) . ' -e'; 
+        }
+        else {
+            $command .= escapeshellarg($tmpTileDir);
+        }
+
+        if ($input->getOption('zoom-levels')) {
+            $command .= ' -z '.$input->getOption('zoom-levels');
+        }
 
         $process = new Process($command);
         $process->setTimeout(self::TILE_GEN_TIMEOUT);
         $process->run();
         if ($process->isSuccessful()) {
-            rename($tmpTileDir, $outputDir);
+            if (!$input->getOption('resume')) {
+                rename($tmpTileDir, $outputDir);
+            }
         }
         else {
             $errorMsg = 'We couldn\'t make tiles from the file: ' . $page->getFilename() . ".\r\n\r\n"

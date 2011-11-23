@@ -214,14 +214,14 @@ $(function() {
                                 .html(
                                     $('<div class="layer-handle"/>')
                                     .append(
-                                        $(inputElem).after(labelSpan)
+                                        $(inputElem).after(labelSpan).after('<div class="layer-expand-control"></div>')
                                     )
                                 )
                                 .append(
                                     $('<div class="layer-inside-wrap" />')
-                                    .html('<div class="layer-opacity-slider"/>')
-                                    .append('<a class="layer-zoom" href="#"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png" /></a>')
-                                    .append('<a class="layer-raise" href="#"><img src="/DAV/web/bundles/berkmanatlasviewer/images/upload_6x12.png" /></a>')
+                                    .html('Opacity:<div class="layer-opacity-slider"/>')
+                                    .append('<a class="layer-zoom atlas-control" href="#" title="Zoom to Page"><img src="/DAV/web/bundles/berkmanatlasviewer/images/fullscreen_12x12.png" alt="Zoom to Page"/></a>')
+                                    .append('<a class="layer-raise atlas-control" href="#" title="Put layer on top"><img src="/DAV/web/bundles/berkmanatlasviewer/images/upload_6x12.png" alt="Put layer on top"/></a>')
                                 )
                             );
                         }
@@ -241,11 +241,11 @@ $(function() {
                 $(this.div).find('.layersDiv').prepend(
                     '<div class="atlasLbl">Atlas</div>' + 
                     '<div class="atlasButtonsDiv">' + 
-                        '<a href="#" title="Zoom to entire atlas" class="atlas-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/>Zoom to atlas</a><br />' +
-                        '<a href="#" title="Zoom to visible pages" class="multi-layer-zoom"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/>Zoom to visible pages</a><br />' +
-                        '<a href="#" title="Hide all pages" class="multi-layer-hide"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/>Hide all pages</a><br />' +
-                        '<a href="#" title="Show all pages" class="multi-layer-show"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/>Show all pages</a>' +
                         '<div class="atlas-opacity-slider"/>' +
+                        '<a href="#" title="Zoom to entire atlas" class="atlas-zoom atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/fullscreen_12x12.png"/></a>' +
+                        '<a href="#" title="Zoom to visible pages" class="multi-layer-zoom atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
+                        '<a href="#" title="Hide all pages" class="multi-layer-hide atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/></a>' +
+                        '<a href="#" title="Show all pages" class="multi-layer-show atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/layers_12x11.png"/></a>' +
                     '</div>'
                 );
                 $(this.dataLbl).html('Pages');
@@ -410,13 +410,31 @@ $(function() {
     map.addControl(testClick);
     testClick.activate();
 
+    $('#metadata, .layer-inside-wrap').hide();
+    $('.layer-expand-control').click(function() {
+        $(this).getLayer().find('.layer-inside-wrap').slideToggle();
+        $(this).getLayer().find('.layer-expand-control').toggleClass('expanded-layer');
+    });
+    $('.layer-handle').dblclick(function() {
+        $(this).getLayer().find('.layer-inside-wrap').slideToggle();
+        $(this).getLayer().find('.layer-expand-control').toggleClass('expanded-layer');
+    });
+    $('#map').append('<div id="metadata-toggle">Atlas Info<div class="atlas-metadata-control"</div></div>');
+    $('#metadata-toggle').click(function() {
+        $('#metadata').slideToggle('fast');
+        $(this).slideToggle('fast');
+    });
+    $('#metadata-close').click(function() {
+        $('#metadata').slideToggle('fast', function() { $('#metadata-toggle').slideToggle('fast'); });
+    });
+
     $('.dataLayersDiv').sortable({
         change: function(e, ui) {
-            var $layer = $(e.target).getLayer(),
+            var $layer = $(ui.item).getLayer(),
                 startIndex = $layer.data('startIndex'),
                 newIndex = $layer.parent().children().not('.ui-sortable-helper').index($layer.parent().find('.ui-sortable-placeholder')),
                 diff = startIndex - newIndex;
-            console.log('startIndex: ' + startIndex + ' - newIndex: ' + newIndex + ' - diff: ' + diff);
+            //console.log('startIndex: ' + startIndex + ' - newIndex: ' + newIndex + ' - diff: ' + diff);
             $layer.data('startIndex', newIndex);
             map.raiseLayer(map.getLayer($layer.data('layerId')), diff);
         },
@@ -432,6 +450,7 @@ $(function() {
         handle: '.layer-handle',
         axis: 'y'
     });
+    $('.olControlLayerSwitcher').mousewheel(function(e) { e.stopPropagation(); });
 });
 function showBoundingBox(layerId) {
     var bounds, i, featureLayer = map.getLayersByName("layerBBox")[0];

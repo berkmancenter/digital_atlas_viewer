@@ -36,6 +36,7 @@
     </script>
     {% javascripts 
                    '@BerkmanAtlasViewerBundle/Resources/public/js/atlas_show.js'
+                   '@BerkmanAtlasViewerBundle/Resources/public/js/jquery-mousewheel.min.js'
                    '@BerkmanAtlasViewerBundle/Resources/public/js/jquery-ui-1.8.16.custom.min.js' %}
     <script src="{{ asset_url }}"></script>
     {% endjavascripts %}
@@ -51,25 +52,6 @@
         <dt>Description</dt>
         <dd>{{ entity.description }}</dd>
     </dl>
-
-    <ul class="record_actions">
-        <li>
-            <a href="{{ path('atlas') }}">
-                Back to the list
-            </a>
-        </li>
-        <li>
-            <a href="{{ path('atlas_edit', { 'id': entity.id }) }}">
-                Edit
-            </a>
-        </li>
-        <li>
-            <form action="{{ path('atlas_delete', { 'id': entity.id }) }}" method="post">
-                {{ form_widget(delete_form) }}
-                <button type="submit">Delete</button>
-            </form>
-        </li>
-    </ul>
+    <div id="metadata-close">x</div>
 </div>
-
 {% endblock body %}

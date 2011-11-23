@@ -57,6 +57,29 @@ class AtlasTileGenCommand extends ContainerAwareCommand
             $output->writeln('Finished page ' . $i . '/' . $numPages);
         }
 
+        $output->writeln('Generating tiles to normalize zoom levels across atlas...');
+        $i = 0;
+        foreach ($pages as $page) {
+            $i++;
+            if ($page->getMinZoomLevel() - $atlas->getMinZoomLevel() > 0) {
+                $command = $this->getApplication()->find('atlas_viewer:page:generate_tiles');
+                $newZoomLevels = $atlas->getMinZoomLevel() . ' - ' . $page->getMinZoomLevel();
+
+                $arguments = array(
+                    'command' => 'atlas_viewer:page:generate_tiles',
+                    'page-id' => $page->getId(),
+                    'working-dir' => $input->getArgument('working-dir'),
+                    'output-dir'  => $input->getArgument('output-dir'),
+                    '-z' => $newZoomLevels
+                );
+
+                $input = new ArrayInput($arguments);
+                $command->run($input, $output);
+            }
+            $output->writeln('<comment>Finished page ' . $i . '/' . $numPages.'</comment>');
+        }
+        $output->writeln('<info>Finished</info>');
+
         if ($input->hasOption('send-email')) {
             $mailer = $this->getContainer()->get('mailer');
             $successMessage = 'We successfully generated tiles for ' . $i . ' page';
