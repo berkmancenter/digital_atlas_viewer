@@ -112,7 +112,7 @@ class AtlasImportCommand extends ContainerAwareCommand
                     $metadataFile = $possibleMetadataFile->getRealPath();
                 }
             }*/
-            $metadataFile = $file->getPath() . '/' . $file->getBasename($file->getExtension()) . 'xml';
+            $metadataFile = $file->getPath() . '/' . pathinfo($file->getPath(), PATHINFO_FILENAME) . '.xml';
             if (file_exists($metadataFile)) {
                 $doc = new \DOMDocument();
                 $doc->recover = true;
