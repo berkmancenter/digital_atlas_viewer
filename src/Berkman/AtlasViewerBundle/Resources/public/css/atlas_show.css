@@ -178,12 +178,33 @@ a.atlas-control {
     background-repeat: no-repeat;
     background-position: center;
 }
+.ui-dialog {
+    max-width: 80%;
+    max-height: 100%;
+    overflow: auto;
+}
 .ui-dialog-titlebar-close {
     background: black;
 }
-.ui-dialog-title {
-    font-size: 13px;
-}
 #page-metadata {
     font-size: 12px;
+}
+.atlasButtonsDiv {
+    font-size: 0.9em;
+    font-weight: normal;
+    text-align: left;
+}
+.atlas-opacity-slider {
+    margin-top: 7px;
+}
+#help {
+    font-size: 0.85em;
+}
+#help-wrap {
+    color: white;
+    text-align: right;
+    padding-right: 20px;
+}
+#help-link {
+    color: white;
 }

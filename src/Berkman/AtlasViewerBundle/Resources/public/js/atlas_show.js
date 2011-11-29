@@ -132,6 +132,15 @@ $(function() {
         zIndex: 1200
     });
 
+    $('#help').dialog({
+        autoOpen: false,
+        modal: true,
+        title: 'Help',
+        width: 'auto',
+        maxWidth: '80%',
+        zIndex: 1200
+    });
+
     /* ---- Atlas-level handlers ---- */
     $('.olControlLayerSwitcher').mousewheel(function(e) { e.stopPropagation(); });
     $('.atlas-opacity-slider').slider({
@@ -286,6 +295,8 @@ $(function() {
             }
         }
     });
+
+    $('#help-link').click(function() { $('#help').dialog('open'); });
 });
 
 function showBoundingBox(layerId) {

@@ -134,9 +134,9 @@ OpenLayers.Control.CustomLayerSwitcher =
                                     'Opacity:<div class="layer-opacity-slider"/>'
                                     + '<div class="layer-controls">'
                                     + '<a class="layer-zoom atlas-control" href="#" title="Zoom to page">'
-                                    + '<img src="/DAV/web/bundles/berkmanatlasviewer/images/fullscreen_12x12.png" alt="Zoom to Page"/>'
+                                    + '<img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png" alt="Zoom to Page"/>'
                                     + '</a>'
-                                    + '<a class="layer-raise atlas-control" href="#" title="Put layer on top">'
+                                    + '<a class="layer-raise atlas-control" href="#" title="Put page on top">'
                                     + '<img src="/DAV/web/bundles/berkmanatlasviewer/images/upload_6x12.png" alt="Put layer on top"/>'
                                     + '</a>'
                                     + '<a class="layer-metadata atlas-control" href="#" title="Show page metadata">'
@@ -159,19 +159,20 @@ OpenLayers.Control.CustomLayerSwitcher =
             var tempLayers = $(this.dataLayersDiv);
             tempLayers.children().each(function(i,li){tempLayers.prepend(li)});
 
-            $(this.div).find('.layersDiv').append($(this.div).find('.baseLbl, .baseLayersDiv'));
             $(this.div).find('.layersDiv').prepend(
                 '<div class="atlasLbl">Atlas</div>' + 
                 '<div class="atlasButtonsDiv">' + 
+                    'Opacity:' +
                     '<div class="atlas-opacity-slider"/>' +
-                    '<a href="#" title="Zoom to entire atlas" class="atlas-zoom atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/fullscreen_12x12.png"/></a>' +
-                    '<a href="#" title="Zoom to visible pages" class="multi-layer-zoom atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
-                    '<a href="#" title="Show all pages" class="multi-layer-show atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/plus_alt_12x12.png"/></a>' +
-                    '<a href="#" title="Hide all pages" class="multi-layer-hide atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/minus_alt_12x12.png"/></a>' +
+                    '<div class="layer-controls">' +
+                        '<a href="#" title="Zoom to visible pages" class="multi-layer-zoom atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/magnifying_glass_alt_12x12.png"/></a>' +
+                        '<a href="#" title="Show all pages" class="multi-layer-show atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/plus_alt_12x12.png"/></a>' +
+                        '<a href="#" title="Hide all pages" class="multi-layer-hide atlas-control"><img src="/DAV/web/bundles/berkmanatlasviewer/images/minus_alt_12x12.png"/></a>' +
+                    '</div>' +
                 '</div>'
             );
+            $(this.div).find('.layersDiv').append($(this.div).find('.baseLbl, .baseLayersDiv')).append('<div id="help-wrap"><a href="#" id="help-link">Help</a></div>');
             $(this.dataLbl).html('Pages');
-            
 
             return this.div;
 

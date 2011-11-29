@@ -5,7 +5,9 @@
     {% stylesheets 'openlayers/theme/default/style.css'
                    '@BerkmanAtlasViewerBundle/Resources/public/css/ui-darkness/jquery-ui-1.8.16.custom.css'
                    '@BerkmanAtlasViewerBundle/Resources/public/css/atlas_show.css'
-                   'openlayers/theme/default/google.css' %}
+                   'openlayers/theme/default/google.css'
+                    filter="cssrewrite"
+    %}
     <link rel="stylesheet" href="{{ asset_url }}" />
     {% endstylesheets %}
 {% endblock stylesheets %}
@@ -57,4 +59,32 @@
     <div id="metadata-close"></div>
 </div>
 <div id="page-metadata"></div>
+<div id="help">
+    <p>The panel on the right side of the screen is broken into three sections: Atlas, Pages, and Base Layers.</p>
+
+    <ul>
+        <li>
+            <h3>Atlas</h3>
+            <p>The Atlas section contains four controls: the Opacity slider, the "Zoom to visible pages" button (magnifying glass), the "Show all pages" button (plus sign), and the "Hide all pages" (minus sign).</p>
+            <p>The Opacity slider controls the opacity of all the pages in the atlas.  This can be useful in cases where you want to make all the layers semi-transparent except one or two.  Just turn down the opacity of the atlas, and turn it back up for the pages you're interested in.</p>
+            <p>The "Zoom to visible pages" (magnifying glass) does just that - it zooms in so that all of the currently displayed pages show neatly on the map.  Say, for example, your atlas consists of five clustered maps and one map that's far separated from the group.  Uncheck the distant map, click the "Zoom to visible pages" button, and your cluster of maps will be more easily viewable.</p>
+            <p>The "Show all pages" and "Hide all pages" buttons are useful when you only want to show a single page.  Just click the minus sign, and then check the box of the page(s) you want to view.</p>
+        </li>
+        <li>
+            <h3>Pages</h3>
+            <p>The Pages section has controls for each page of the atlas.  Each page is represented by a block.  Each block has a top bar, which includes the title, a checkbox to show or hide the page, and the expand/collapse button.</p>
+            <p>Use the expand/collapse button or double click on the title to show or hide the control for an individual page.  The title bar can also be dragged to move the page above or below other pages on the map.</p>
+            <p>Each page block, once expanded, shows the Opacity slider and the "Zoom to page," "Put page on top," "Show page metadata" buttons.  The Opacity slider and "Zoom to page" buttons are similar to their atlas-level counterparts.  The "Put page on top" button moves the page to the top of the map stack in the map window.  This is the same as dragging the page title to the top of the stack.  The "Show page metadata" button pops up a box with information about the page (if it exists).</p>
+        </li>
+        <li>
+            <h3>Base Layers</h3>
+            <p>The Base Layer panel allows you to pick which map will show beneath the atlas.  Only one base layer may be selected at a time.</p>
+        </li>
+    </ul>
+    <h3>Additional Tips</h3>
+    <ul>
+        <li>You can double click anywhere on the map to show a list of all the pages at that location.</li> 
+        <li>You can minimize both the atlas info panel at the bottom of the screen and the control panel on the right by clicking the "x" button in the upper-right hand corner of each.</li>
+    </ul>
+</div>
 {% endblock body %}
